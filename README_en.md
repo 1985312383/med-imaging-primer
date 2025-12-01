@@ -2,6 +2,8 @@
 
 <div align="center">
 
+![banner](/docs/public/images/banner.png)
+
 **English | [简体中文](README.md)**
 
 </div>
