@@ -53,7 +53,58 @@ Augmentation complete:
 
 **Algorithm Analysis:** Medical image augmentation increases training data diversity through geometric and intensity transformations. The execution results show that CT image rotation is limited to ±5°, translation range to ±5%, ensuring anatomical structure reasonableness. Elastic deformation parameters (α=1000, σ=8) provide moderate deformation intensity while increasing data diversity and maintaining clinical significance. Noise addition simulates electronic noise from real CT acquisition, improving model robustness.
 
-    **Core Principles of Medical Image Augmentation:**
+### Medical Constraints Framework for Augmentation
+
+#### Three-Level Medical Constraints
+
+Medical image augmentation must satisfy three critical constraint levels, distinguishing it fundamentally from natural image augmentation:
+
+##### Level 1: Anatomical Integrity Constraints
+- **Anatomical Structure Preservation**: Transformations must respect anatomical relationships that are fixed in nature
+- **Organ Boundary Maintenance**: Cannot distort organ boundaries beyond physiological limits
+- **Spatial Relationship Preservation**: Relative positions between organs must remain consistent
+- **Examples of violations**: Extreme rotation (>15°) violates natural head/body alignment; displacement >10% of image size may violate vascular path physics
+
+##### Level 2: Pathology Authenticity Constraints
+- **Lesion Feature Preservation**: Pathological features must remain recognizable and clinically relevant
+- **Disease Pattern Consistency**: Augmentation cannot create unrealistic disease morphologies
+- **Progression Plausibility**: Augmented pathology must follow realistic disease progression patterns
+- **Examples of violations**: Noise addition that obscures lesion boundaries; intensity changes that make disease undiagnosable; rotation that prevents radiologist recognition
+
+##### Level 3: Clinical Applicability Constraints
+- **Acquisition Method Realism**: Augmentation must simulate realistic variations from actual acquisition protocols
+- **Equipment Variation Simulation**: Can model different scanner generations, but not physically impossible scenarios
+- **Clinical Decision Impact**: Augmentation must not change clinical decision thresholds
+- **Examples of violations**: Creating image quality worse than worst clinical scenario; simulating artifacts from non-existent equipment; introducing noise patterns never seen clinically
+
+#### Modality-Specific Augmentation Requirements
+
+| Imaging Modality | Key Challenge | Recommended Augmentation | Prohibited Operations | Clinical Validation | Risk Level |
+|---|---|---|---|---|---|
+| **CT** | Preserve HU values physical meaning | Window/level adjustment, elastic deformation (±5°), noise injection | Extreme rotation (>10°), arbitrary intensity scaling | Compare with multi-protocol scans | HIGH |
+| **MRI** | Preserve sequence-specific contrast | Intensity transformation within sequence range, elastic deformation, motion simulation | Sequence mixing, arbitrary signal inversion | Ensure tissue T1/T2 relationships intact | HIGH |
+| **X-ray** | Preserve projection geometry and density | Elastic deformation (mild), intensity variation, noise addition | Geometric distortion (>15°), extreme scaling | Ensure silhouettes match radiological signs | MEDIUM |
+| **Ultrasound** | Preserve speckle patterns | Speckle reduction, gain adjustment, focal point variation | Remove speckle completely, change beam angle | Maintain acoustic shadow/enhancement patterns | MEDIUM |
+
+##### Clinical Validation Requirement
+
+**Critical Requirement**: All augmentation strategies must undergo radiologist verification to ensure they produce clinically realistic variations rather than introducing non-clinical artifacts.
+
+- **Validation Process**:
+  1. Generate augmented image samples
+  2. Radiologist review and classification
+  3. Compare with real clinical variants
+  4. Approve if indistinguishable from clinical reality
+
+- **Approval Criteria**:
+  - ✓ Augmentation creates realistic clinical variants
+  - ✓ No introduction of non-clinical artifacts
+  - ✓ Pathological features remain diagnostically relevant
+  - ✗ Reject if clinically non-realistic
+
+---
+
+### Core Principles of Medical Image Augmentation:
 
 1. **Anatomical Reasonableness**: Transformations must maintain correct anatomical relationships
 2. **Pathology Preservation**: Do not alter or obscure key pathological features
