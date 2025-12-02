@@ -749,7 +749,7 @@ Below we showcase the practical effects of our implemented preprocessing algorit
 
 ### MRI Bias Field Visualization and Correction
 
-![MRI Bias Field Visualization](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/visualize_bias_field/output/bias_field_visualization_division.png)
+![MRI Bias Field Visualization](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/visualize_bias_field/output/bias_field_visualization_division.png)
 *MRI bias field visualization: left - original image, center - estimated bias field, right - corrected image*
 
 **Bias field correction performance comparison:**
@@ -757,12 +757,12 @@ Below we showcase the practical effects of our implemented preprocessing algorit
 - Homomorphic method: MSE=0.1984, PSNR=7.0dB, SSIM=0.149
 - Polynomial method: MSE=0.0663, PSNR=11.8dB, SSIM=0.545
 
-![Multiple Bias Field Correction Methods Comparison](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/visualize_bias_field/output/bias_field_methods_comparison.png)
+![Multiple Bias Field Correction Methods Comparison](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/visualize_bias_field/output/bias_field_methods_comparison.png)
 *Performance comparison of different bias field correction methods, showing polynomial method performs best in this example*
 
 ### White Stripe Intensity Normalization
 
-![White Stripe Normalization Results](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/white_stripe_normalization/output/white_stripe_t1_normalization.png)
+![White Stripe Normalization Results](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/white_stripe_normalization/output/white_stripe_t1_normalization.png)
 *White Stripe intensity normalization: showing original image, normalized result, difference comparison, and statistical analysis*
 
 **Normalization effects for different MRI sequences:**
@@ -770,12 +770,12 @@ Below we showcase the practical effects of our implemented preprocessing algorit
 - T2 sequence: 6 white matter pixels, normalized mean 0.886
 - FLAIR sequence: 10 white matter pixels, normalized mean 0.888
 
-![Multi-modality MRI Normalization Comparison](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/white_stripe_normalization/output/white_stripe_modality_comparison.png)
+![Multi-modality MRI Normalization Comparison](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/white_stripe_normalization/output/white_stripe_modality_comparison.png)
 *White Stripe normalization effects for different MRI sequences, showing intensity distributions and normalization results*
 
 ### CLAHE Contrast Enhancement
 
-![CLAHE Parameter Comparison](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/clahe_enhancement/output/clahe_parameter_comparison.png)
+![CLAHE Parameter Comparison](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/clahe_enhancement/output/clahe_parameter_comparison.png)
 *Effects of different CLAHE parameters, showing progressive enhancement from weak to strongest*
 
 **CLAHE enhancement quantitative evaluation:**
@@ -785,12 +785,12 @@ Below we showcase the practical effects of our implemented preprocessing algorit
 - Edge strength improvement factor: 18.19
 - PSNR: 28.05 dB, SSIM: 0.566
 
-![CLAHE Detailed Analysis](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/clahe_enhancement/output/clahe_detailed_analysis.png)
+![CLAHE Detailed Analysis](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/clahe_enhancement/output/clahe_detailed_analysis.png)
 *Detailed CLAHE enhancement analysis, including edge detection, intensity distribution, and enhancement effect evaluation*
 
 ### CT HU Value Clipping
 
-![HU Value Clipping Comparison](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/clip_hu_values/output/hu_clipping_软组织范围.png)
+![HU Value Clipping Comparison](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/clip_hu_values/output/hu_clipping_软组织范围.png)
 *CT HU value clipping: showing soft tissue range (-200, 400 HU) clipping effect*
 
 **Effects of different clipping strategies:**
@@ -801,7 +801,7 @@ Below we showcase the practical effects of our implemented preprocessing algorit
 
 ### Metal Artifact Detection
 
-![Metal Artifact Detection Results](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/detect_metal_artifacts/output/metal_artifact_detection.png)
+![Metal Artifact Detection Results](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/detect_metal_artifacts/output/metal_artifact_detection.png)
 *CT metal artifact detection: automatic detection of metal regions and artifact severity assessment*
 
 **Detection effects of different thresholds:**
@@ -811,7 +811,7 @@ Below we showcase the practical effects of our implemented preprocessing algorit
 | 3000           | 2                | 165          | 0.02% | Slight   |
 | 4000           | 2                | 133          | 0.01% | Slight   |
 
-![Metal Artifact Threshold Comparison](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/detect_metal_artifacts/output/metal_threshold_comparison.png)
+![Metal Artifact Threshold Comparison](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/detect_metal_artifacts/output/metal_threshold_comparison.png)
 *Comparison of metal artifact detection effects for different HU thresholds*
 
 ### Practical Application Recommendations

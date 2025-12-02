@@ -366,9 +366,8 @@ N4ITK偏场校正参数设置:
 [📖 **完整代码示例**: `n4itk_bias_correction/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/n4itk_bias_correction/) - 包含完整的N4ITK偏场校正实现、测试用例、合成数据生成和可视化功能]
   校正图像 - 均值: 0.247, 标准差: 0.076, CV: 0.308
   CV减少: 15.2%, 标准差减少: 14.6%
-```
 
-![N4ITK偏场校正结果](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/n4itk_bias_correction/output/bias_field_visualization_division.png)
+![N4ITK偏场校正结果](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/n4itk_bias_correction/output/bias_field_visualization_division.png)
 *N4ITK偏场校正效果：左图为原始图像（含偏场场），中图为估计的偏场场，右图为校正后的图像。校正后图像强度更加均匀，同质组织的强度一致性显著提高。*
 
 **算法分析：** N4ITK算法通过B样条基函数建模偏场场，使用迭代优化方法最小化能量函数。从运行结果可以看出，经过28次迭代后算法收敛，变异系数(CV)从0.363降低到0.308，减少了15.2%，有效改善了MRI图像的强度不均匀性。
@@ -418,7 +417,7 @@ White Stripe标准化开始 (方法: T1)
   标准化范围: [0.000, 1.000]
 ```
 
-![White Stripe标准化结果](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/white_stripe_normalization/output/white_stripe_t1_normalization.png)
+![White Stripe标准化结果](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/white_stripe_normalization/output/white_stripe_t1_normalization.png)
 *White Stripe标准化效果：左上图为原始T1图像，右上图为标准化结果，左下图为差异对比，右下图为统计分析。标准化后图像强度范围统一到[0,1]，不同扫描间的强度一致性显著改善。*
 
 **算法分析：** White Stripe算法利用脑部MRI中白质信号相对稳定的特性，通过直方图分析自动识别白质强度范围。从运行结果可以看出，算法在第2次迭代后即收敛，识别出白质均值为0.444。标准化后，不同MRI扫描的图像强度被映射到统一的[0,1]范围，为后续的深度学习模型提供了标准化的输入。
@@ -486,7 +485,7 @@ class MultisequenceFusion:
   融合统计: 均值=0.000, 标准差=1.000
 ```
 
-![多序列MRI融合结果](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/multisequence_fusion_channels/output/multisequence_fusion_result.png)
+![多序列MRI融合结果](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/multisequence_fusion_channels/output/multisequence_fusion_result.png)
 *多序列MRI融合效果：展示了T1、T2、FLAIR和DWI四种序列的融合结果。不同序列提供互补的组织信息，融合后的图像包含了更丰富的诊断信息。*
 
 **算法分析：** 多序列融合通过将不同MRI序列的信息整合，提高了诊断的准确性。从运行结果可以看出，四种序列（T1、T2、FLAIR、DWI）被成功融合为一个4通道的图像。每个序列都经过Z-score标准化，确保强度范围的统一。融合后的图像保留了各个序列的互补信息，为深度学习模型提供了更全面的输入特征。
@@ -917,7 +916,7 @@ def validate_preprocessing(original_image, processed_image, roi_mask=None):
 
 ### MRI偏场场可视化与校正
 
-![MRI偏场场可视化](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/visualize_bias_field/output/bias_field_visualization_division.png)
+![MRI偏场场可视化](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/visualize_bias_field/output/bias_field_visualization_division.png)
 *MRI偏场场可视化：左图为原始图像，中图为估计的偏场场，右图为校正后图像*
 
 **偏场场校正效果对比：**
@@ -925,12 +924,12 @@ def validate_preprocessing(original_image, processed_image, roi_mask=None):
 - 同态方法：MSE=0.1984, PSNR=7.0dB, SSIM=0.149
 - 多项式方法：MSE=0.0663, PSNR=11.8dB, SSIM=0.545
 
-![多种偏场场校正方法对比](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/visualize_bias_field/output/bias_field_methods_comparison.png)
+![多种偏场场校正方法对比](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/visualize_bias_field/output/bias_field_methods_comparison.png)
 *不同偏场场校正方法的性能对比，显示多项式方法在此例中表现最佳*
 
 ### White Stripe强度标准化
 
-![White Stripe标准化结果](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/white_stripe_normalization/output/white_stripe_t1_normalization.png)
+![White Stripe标准化结果](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/white_stripe_normalization/output/white_stripe_t1_normalization.png)
 *White Stripe强度标准化：展示了原始图像、标准化结果、差异对比和统计分析*
 
 **不同MRI序列的标准化效果：**
@@ -938,12 +937,12 @@ def validate_preprocessing(original_image, processed_image, roi_mask=None):
 - T2序列：白质像素6个，标准化后均值0.886
 - FLAIR序列：白质像素10个，标准化后均值0.888
 
-![多模态MRI标准化对比](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/white_stripe_normalization/output/white_stripe_modality_comparison.png)
+![多模态MRI标准化对比](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/white_stripe_normalization/output/white_stripe_modality_comparison.png)
 *不同MRI序列的White Stripe标准化效果对比，显示各序列的强度分布和标准化结果*
 
 ### CLAHE对比度增强
 
-![CLAHE参数对比](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/clahe_enhancement/output/clahe_parameter_comparison.png)
+![CLAHE参数对比](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/clahe_enhancement/output/clahe_parameter_comparison.png)
 *不同CLAHE参数的效果对比，从弱增强到最强增强的渐进效果*
 
 **CLAHE增强效果定量评估：**
@@ -953,12 +952,12 @@ def validate_preprocessing(original_image, processed_image, roi_mask=None):
 - 边缘强度提升倍数：18.19
 - PSNR：28.05 dB，SSIM：0.566
 
-![CLAHE详细分析](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/clahe_enhancement/output/clahe_detailed_analysis.png)
+![CLAHE详细分析](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/clahe_enhancement/output/clahe_detailed_analysis.png)
 *CLAHE增强的详细分析，包括边缘检测、强度分布和增强效果评估*
 
 ### CT HU值截断处理
 
-![HU值截断对比](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/clip_hu_values/output/hu_clipping_软组织范围.png)
+![HU值截断对比](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/clip_hu_values/output/hu_clipping_软组织范围.png)
 *CT HU值截断：展示软组织范围(-200, 400 HU)的截断效果*
 
 **不同截断策略的效果：**
@@ -969,7 +968,7 @@ def validate_preprocessing(original_image, processed_image, roi_mask=None):
 
 ### 金属伪影检测
 
-![金属伪影检测结果](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/detect_metal_artifacts/output/metal_artifact_detection.png)
+![金属伪影检测结果](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/detect_metal_artifacts/output/metal_artifact_detection.png)
 *CT金属伪影检测结果：自动检测金属区域并评估伪影严重程度*
 
 **不同阈值的检测效果：**
@@ -979,7 +978,7 @@ def validate_preprocessing(original_image, processed_image, roi_mask=None):
 | 3000     | 2          | 165        | 0.02% | 轻微     |
 | 4000     | 2          | 133        | 0.01% | 轻微     |
 
-![金属伪影阈值对比](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/detect_metal_artifacts/output/metal_threshold_comparison.png)
+![金属伪影阈值对比](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/detect_metal_artifacts/output/metal_threshold_comparison.png)
 *不同HU阈值对金属伪影检测效果的影响对比*
 
 ### 实际应用建议
