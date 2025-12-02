@@ -1281,6 +1281,12 @@ def calculate_map(detections, ground_truths, iou_threshold=0.5):
 
 #### Task-driven Model Selection
 
+![Medical Image Analysis Model Selection Guide](/images/ch05/05-model-selection-en.png)
+*Figure: Selecting appropriate deep learning models based on medical image data types (2D X-ray, 3D CT/MRI, WSI whole slide images) and task types *
+
+<details>
+<summary>📖 View Original Mermaid Code</summary>
+
 ```mermaid
 flowchart TD
     A[Medical Image Analysis Task] --> B{Data Type?}
@@ -1310,6 +1316,7 @@ flowchart TD
     L --> O[Ensemble Methods]
     L --> P[Cross-validation]
 ```
+</details>
 
 #### Performance Comparison
 
