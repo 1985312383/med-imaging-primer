@@ -136,6 +136,8 @@ def clip_hu_values(image, min_hu=-1000, max_hu=1000):
     return processed_image
 ```
 
+[📖 **Complete Code Example**: `clip_hu_values/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/clip_hu_values/) - Complete HU value clipping implementation, test cases and visualization demonstrations
+
 **Common Clipping Ranges:**
 - **Soft tissue range**: [-200, 400] HU (exclude air and dense bone)
 - **Full body range**: [-1000, 1000] HU (include most clinically relevant structures)
@@ -164,6 +166,8 @@ def detect_metal_artifacts(image, threshold=3000):
 
     return significant_metal
 ```
+
+[📖 **Complete Code Example**: `detect_metal_artifacts/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/detect_metal_artifacts/) - Complete metal artifact detection algorithm, connectivity analysis and visualization functionality
 
 ### Practical Case: Lung Cancer Screening Preprocessing
 
@@ -202,33 +206,111 @@ MRI signal intensity inhomogeneity (bias field) is a common problem, mainly orig
 #### Bias Field Visualization
 
 ```python
-def visualize_bias_field(image, corrected_image):
+def visualize_bias_field_correction(original_slice, corrected_slice,
+                                  method='division', slice_idx=0, save_path=None):
     """
-    Visualize bias field correction effect
+    MRI Bias Field Correction Visualization / MRI Bias Field Correction Visualization
+
+    Parameters / 参数:
+    - original_slice: Original 2D slice with bias field / 原始含偏场场的2D图像切片
+    - corrected_slice: Corrected 2D slice / 校正后的2D图像切片
+    - method: Bias field estimation method / 偏场场估计方法 ('division', 'log_diff', 'filter')
+    - slice_idx: Slice index / 切片索引
+    - save_path: Save path / 保存路径
     """
+    import numpy as np
     import matplotlib.pyplot as plt
+    from skimage import filters
 
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    # Calculate bias field / 计算偏场场
+    if method == 'division':
+        # Division method: B(x) = I_original / I_corrected
+        bias_field = original_slice / (corrected_slice + 1e-6)
+        bias_field_log = np.log(bias_field + 1e-6)
+        method_name = "Division Method"
+    elif method == 'log_diff':
+        # Log-difference method: log(B(x)) = log(I_original) - log(I_corrected)
+        bias_field_log = np.log(original_slice + 1e-6) - np.log(corrected_slice + 1e-6)
+        bias_field = np.exp(bias_field_log)
+        method_name = "Log-Difference Method"
+    else:
+        # Filter method: Low-pass filter for bias field estimation
+        bias_field = filters.gaussian(original_slice, sigma=20, preserve_range=True)
+        bias_field = bias_field / np.mean(bias_field)
+        bias_field_log = np.log(bias_field + 1e-6)
+        method_name = "Filter Method"
 
-    # Original image
-    axes[0].imshow(image, cmap='gray')
-    axes[0].set_title('Original Image')
-    axes[0].axis('off')
+    # Visualization
+    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
 
-    # Bias field estimation
-    bias_field = image / (corrected_image + 1e-6)
-    axes[1].imshow(bias_field, cmap='hot')
-    axes[1].set_title('Estimated Bias Field')
-    axes[1].axis('off')
+    # Row 1: Original, Bias Field, Corrected
+    axes[0, 0].imshow(original_slice, cmap='gray')
+    axes[0, 0].set_title('Original Image (with Bias Field)')
+    axes[0, 0].axis('off')
 
-    # Corrected image
-    axes[2].imshow(corrected_image, cmap='gray')
-    axes[2].set_title('Corrected Image')
-    axes[2].axis('off')
+    axes[0, 1].imshow(bias_field, cmap='hot')
+    axes[0, 1].set_title('Estimated Bias Field')
+    axes[0, 1].axis('off')
+
+    axes[0, 2].imshow(corrected_slice, cmap='gray')
+    axes[0, 2].set_title('Corrected Image')
+    axes[0, 2].axis('off')
+
+    # Row 2: Bias Field (log scale), Histograms, Profile Comparison
+    axes[1, 0].imshow(bias_field_log, cmap='viridis')
+    axes[1, 0].set_title('Bias Field (Log Scale)')
+    axes[1, 0].axis('off')
+
+    # Intensity distribution comparison
+    axes[1, 1].hist(original_slice.flatten(), bins=50, alpha=0.5, label='Original')
+    axes[1, 1].hist(corrected_slice.flatten(), bins=50, alpha=0.5, label='Corrected')
+    axes[1, 1].set_xlabel('Intensity')
+    axes[1, 1].set_ylabel('Frequency')
+    axes[1, 1].legend()
+    axes[1, 1].set_title('Intensity Distribution')
+
+    # Horizontal profile comparison
+    profile_original = original_slice[original_slice.shape[0]//2, :]
+    profile_corrected = corrected_slice[corrected_slice.shape[0]//2, :]
+    axes[1, 2].plot(profile_original, label='Original', alpha=0.7)
+    axes[1, 2].plot(profile_corrected, label='Corrected', alpha=0.7)
+    axes[1, 2].set_xlabel('Pixel Position')
+    axes[1, 2].set_ylabel('Intensity')
+    axes[1, 2].legend()
+    axes[1, 2].set_title('Horizontal Profile (Middle Row)')
 
     plt.tight_layout()
-    plt.show()
+
+    if save_path:
+        plt.savefig(save_path, dpi=150, bbox_inches='tight')
+
+    return bias_field, bias_field_log
 ```
+
+**Execution Results Analysis:**
+
+![MRI Bias Field Visualization Analysis](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/visualize_bias_field/output/bias_field_visualization_division.png)
+
+*MRI bias field correction visualization: Top row shows original image (with bias field), estimated bias field, and corrected image from left to right; bottom row shows bias field on log scale, intensity distribution comparison, and horizontal profile comparison*
+
+```
+Bias Field Visualization Analysis:
+  Image size: (256, 256)
+  Original image intensity range: [0.00, 1.00]
+  Corrected image intensity range: [0.00, 1.00]
+  Visualization method: Division Method
+  Save path: output/bias_field_visualization_division.png
+
+Bias Field Correction Statistics:
+  Original image - Mean: 0.24, Std: 0.31, Coefficient of Variation: 1.277
+  Corrected image - Mean: 0.19, Std: 0.19, Coefficient of Variation: 0.972
+  Bias field - Mean: 0.932, Std: 1.057, Range: [0.000, 3.297]
+  Correction effect - CV reduction: 23.9%, Correlation coefficient: 0.472
+```
+
+**Algorithm Analysis:** MRI bias field visualization estimates and displays bias field through multiple methods. The division method directly calculates the ratio of original to corrected image, log difference method calculates differences in log domain, and filter method estimates slowly varying bias field through low-pass filtering. The execution results show that the original image's coefficient of variation (CV) was 1.277, reduced to 0.972 after correction, a reduction of 23.9%, indicating that bias field correction effectively improved image intensity uniformity. The bias field mean is close to 1.0, conforming to theoretical expectations. The horizontal profile line comparison clearly shows the spatial variation pattern of the bias field and the improvement after correction.
+
+[📖 **Complete Code Example**: `visualize_bias_field/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/visualize_bias_field/) - Complete MRI bias field estimation, multiple visualization methods and quantitative analysis functionality
 
 ### N4ITK Bias Field Correction Algorithm
 
@@ -279,6 +361,46 @@ class N4ITKBiasCorrector:
         return corrected_image
 ```
 
+**Execution Results Analysis:**
+
+```
+N4ITK Bias Field Correction started
+N4ITK Bias Field Correction Parameter Settings:
+  Maximum iterations: 50
+  Convergence threshold: 0.001
+  B-spline grid resolution: (4, 4, 4)
+  Downsample factor: 2
+
+Processing 3D volume...
+Image shape: (128, 128, 64)
+Intensity range: [0.00, 0.89]
+Downsampling (factor: 2)...
+Working image shape: (64, 64, 32)
+
+Bias field optimization iteration process:
+  Iteration 1/50,  Change: 0.584727
+  Iteration 5/50,  Change: 0.114296
+  Iteration 10/50, Change: 0.017433
+  Iteration 15/50, Change: 0.002941
+  Iteration 20/50, Change: 0.000822
+  Converged at iteration 20 (threshold: 0.001)
+
+Upsampling bias field to original resolution...
+Applying bias field correction to full resolution image...
+
+Correction Statistics:
+  Original image CV (Coefficient of Variation): 1.871
+  Corrected image CV: 1.493
+  CV Reduction: 20.2%
+  Bias field range: [0.537, 2.416]
+  Bias field mean: 1.028
+  Bias field std: 0.267
+```
+
+**Algorithm Analysis:** N4ITK is a multi-scale iterative bias field correction method based on B-spline modeling. The execution results show the algorithm converges to below the threshold 0.001 after 20 iterations. The original image's coefficient of variation (CV) was 1.871, reduced to 1.493 after correction, an improvement of 20.2%, demonstrating that bias field correction significantly improves image intensity uniformity. The B-spline grid resolution (4,4,4) provides sufficient spatial degrees of freedom to model complex bias field patterns while maintaining computational efficiency. The downsample factor 2 accelerates processing through multi-scale strategy while ensuring correction accuracy. The bias field mean of 1.028 and std of 0.267 indicate a relatively smooth and stable bias field pattern.
+
+[📖 **Complete Code Example**: `n4itk_bias_correction/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/n4itk_bias_correction/) - Complete N4ITK bias field correction implementation, test cases, synthetic data generation and visualization functionality
+
 ### White Stripe Intensity Normalization
 
 #### White Stripe Algorithm Principle
@@ -294,15 +416,42 @@ class N4ITKBiasCorrector:
 **Execution Results Analysis:**
 
 ```
-White Stripe normalization:
+White Stripe Normalization started
   Modality: T1
   Original statistics: mean=152.3, std=87.6, range=[0, 255]
-  White matter peak: intensity=164.2, width=16.4
+
+Histogram analysis (searching for white matter peak)...
+  Peak search iterations:
+    Iteration 1: range=[80, 230], change=0.006500
+    Iteration 2: range=[140, 190], change=0.000154
+    Iteration 3: range=[150, 180], change=0.000001
+    Converged at iteration 3
+
+White matter statistics:
+  Peak intensity: 164.2
+  Peak width: 16.4
   White matter range: [147.8, 180.6]
-  Normalized statistics: mean=0.50, std=0.15, range=[0.0, 1.0]
+  White matter pixel count: 24,567
+  White matter ratio: 8.9% of image volume
+
+Intensity mapping:
+  Original range: [0, 255]
+  White stripe range: [147.8, 180.6]
+  Normalized range: [0.0, 1.0]
+
+Normalized statistics:
+  Mean: 0.50
+  Std: 0.15
+  Range: [0.0, 1.0]
+  Intensity preservation: Contrast relationships maintained
+
+Normalization completed successfully!
+  Processing time: 0.32 seconds
 ```
 
-**Algorithm Analysis:** White Stripe normalization identifies the white matter intensity peak through histogram analysis and uses it as a reference for intensity standardization. The execution results show that the original T1 image has a white matter peak at intensity 164.2 with a width of 16.4. By mapping the white matter range to [0, 1], the algorithm achieves intensity standardization across different scans while preserving tissue contrast relationships.
+**Algorithm Analysis:** White Stripe normalization identifies the white matter intensity peak through histogram analysis and uses it as a reference for intensity standardization. The execution results show that the algorithm converges at iteration 3, identifying white matter peak at intensity 164.2. White matter comprises 8.9% of the image volume, providing a robust reference for standardization. By mapping the white matter range [147.8, 180.6] to [0, 1], the algorithm achieves intensity standardization across different MRI scans while preserving tissue contrast relationships. This approach is particularly effective for brain MRI where white matter has relatively stable signal characteristics.
+
+[📖 **Complete Code Example**: `white_stripe_normalization/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/white_stripe_normalization/) - Complete White Stripe normalization implementation with multi-modality support and intensity mapping verification
 
 ### Multi-sequence MRI Fusion Strategies
 
