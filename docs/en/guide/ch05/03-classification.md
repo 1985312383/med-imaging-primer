@@ -258,8 +258,9 @@ X-ray classification requires understanding the overall context:
 - **Local features**: Specific lesion signs
 - **Relative positions**: Spatial relationships between anatomical structures
 
-![Chest X-ray classification](https://www.researchgate.net/publication/341837493/figure/fig1/AS:894194425237504@1590191057416/Chest-X-ray-image-classification-using-deep-learning-The-model-learns-automatically-the.ppm)
-*Deep learning-based chest X-ray classification, the model automatically learns disease features*
+![Chest X-ray classification](/images/ch05/CheXNet.png)
+*Architectural design of [CheXNet](https://arxiv.org/pdf/1711.05225) model: Deep learning-based chest X-ray classification, the model automatically learns disease features*
+*Source: [Diagnosis of corona diseases from associated genes and X-ray images using machine learning algorithms and deep CNN](https://doi.org/10.1016/j.imu.2021.100621)*
 
 ### Classic 2D CNN Architectures
 

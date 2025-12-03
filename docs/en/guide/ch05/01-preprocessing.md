@@ -169,19 +169,221 @@ def detect_metal_artifacts(image, threshold=3000):
 
 [📖 **Complete Code Example**: `detect_metal_artifacts/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/detect_metal_artifacts/) - Complete metal artifact detection algorithm, connectivity analysis and visualization functionality
 
-### Practical Case: Lung Cancer Screening Preprocessing
+### Practical Case: [Preparing CT imaging datasets for deep learning in lung nodule analysis: Insights from four well-known datasets](https://pmc.ncbi.nlm.nih.gov/articles/PMC10361226/pdf/main.pdf)
 
-![CT Lung Nodule Preprocessing Pipeline](https://ars.els-cdn.com/content/image/1-s2.0-S1361841515000035-gr3.jpg)
-*CT lung nodule detection preprocessing pipeline: from raw DICOM to model input*
+The following comprehensive pipeline represents the clinical standard used in LUNA16 and similar lung nodule detection datasets.
 
-**Complete Preprocessing Pipeline:**
-1. **DICOM reading**: Extract pixel data and HU value calibration information
-2. **HU value conversion**: Apply rescale slope and intercept
-3. **Lung region extraction**: Based on HU value thresholding and connectivity analysis
-4. **Resampling**: Unify to isotropic resolution (e.g., 1mm³)
-5. **Windowing**: Apply lung window (window level -600, window width 1500)
-6. **Normalization**: Map to [0, 1] range
-7. **Size adjustment**: Crop or padding to fixed size
+![ Image preprocessing steps may be involved in different tasks](/images/ch05/lung_CT.png)
+*Figure:  Image preprocessing steps may be involved in different tasks*
+
+
+#### **Step-by-Step Preprocessing Pipeline**
+
+##### **1. DICOM Data Reading and HU Value Conversion**
+
+Raw DICOM files contain pixel data that must be converted to Hounsfield Unit (HU) values, the standardized intensity scale for CT imaging.
+
+**Process**:
+- Extract pixel data from DICOM files
+- Apply rescale intercept and slope: **HU = pixel_value × slope + intercept**
+- Validate HU value ranges (typically -1000 to +3000 HU)
+- Verify slice thickness < 3 mm for nodule detection accuracy
+
+**Clinical Reference Values**:
+- Air: **-1000 HU**
+- Lung tissue: **-400 to -600 HU**
+- Fat: **-50 to -100 HU**
+- Water: **0 HU**
+- Bone: **+400 to +1000 HU**
+
+##### **2. HU Value Clipping and Range Standardization**
+
+To focus on relevant anatomical structures and improve model training stability, HU values are clipped to a specific range.
+
+**Standard Clipping Range** (LUNA16 Standard):
+- **Lower bound**: **-1200 HU** (captures air-filled regions and lung tissue)
+- **Upper bound**: **+600 HU** (includes nodule attenuation range)
+- **Formula**: `clipped_HU = np.clip(HU, -1200, 600)`
+
+This range encompasses:
+- Solid nodules: HU ≥ -300 (maximum attenuation)
+- Ground-glass nodules: HU < -300 (reduced attenuation)
+- Malignant lesions: Mean HU 30-50, maximum < 150
+
+**[📖 Complete Code Example**: `clip_hu_values/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/clip_hu_values/) - HU value clipping with clinical validation]
+
+##### **3. Lung Window and Contrast Enhancement**
+
+Lung window settings optimize visualization of nodules within lung parenchyma.
+
+**Standard Lung Window Settings**:
+- **Window Level (WL)**: **-600 HU** (center)
+- **Window Width (WW)**: **1500 HU** (range: -1200 to +300 HU)
+
+**Alternative Settings**:
+- High-resolution: WL = -650, WW = 1500
+- Conservative: WL = -600, WW = 1450
+
+**Why Lung Window?**
+- Optimizes contrast between lung tissue and nodules
+- Suppresses mediastinal structures that can cause false positives
+- Aligns with clinical radiologist viewing protocols
+
+**Enhancement Technique**: CLAHE (Contrast Limited Adaptive Histogram Equalization)
+- Improves nodule visibility without excessive noise amplification
+- Preserves tissue boundaries and internal structure
+- Particularly effective for ground-glass nodules
+
+##### **4. Isotropic Resampling**
+
+Clinical CT scans often have anisotropic voxel spacing (e.g., 0.7 × 0.7 × 5 mm). Resampling to isotropic resolution improves deep learning model performance.
+
+**Standard Target Resolution**: **1 × 1 × 1 mm³ isotropic**
+- Ensures uniform sensitivity across spatial dimensions
+- Matches LUNA16 dataset standard
+- Allows true 3D convolution operations
+
+**Resampling Method** (Recommended): **Cubic Spline Interpolation**
+- Outperforms trilinear interpolation in preserving nodule sharpness
+- Uses 6-point kernel
+- Maintains continuous second derivatives
+- Excellent local and Fourier properties
+
+**Alternative Interpolation Methods**:
+- **Trilinear**: Linearly weights 8 neighboring voxels, good balance of speed/quality
+- **Linear**: Faster, acceptable for lung tissue but may blur nodule edges
+- **Nearest Neighbor**: Not recommended (causes aliasing and blocky artifacts)
+
+##### **5. Lung Parenchyma Segmentation**
+
+Segmentation isolates lung tissue from surrounding structures, reducing false positive detection in non-lung regions.
+
+**Segmentation Pipeline**:
+
+**Step 1: HU Thresholding**
+- **Primary Threshold**: -500 HU
+- Binarizes image to isolate low-density lung tissue
+- Separates lung from dense thoracic structures (bone, muscle)
+
+**Step 2: Morphological Operations**
+- **Hole Filling**: Close internal gaps within lung masks
+- **Small Object Removal**: Eliminate noise (< 50 pixels)
+- **Dilation & Erosion**: Refine lung boundaries using morphological closing with spherical structuring elements
+- **Iterative Application**: Multiple passes improve continuity
+
+**Step 3: Connected Component Analysis**
+- Identify largest connected components (left/right lungs)
+- Remove extrapulmonary regions to reduce false positives
+- Smooth boundaries for precise voxel-level segmentation
+
+**Result**: Binary lung mask identifying voxels within lung parenchyma
+
+##### **6. Nodule Candidate Extraction**
+
+Within the segmented lung region, nodule candidates are identified and extracted.
+
+**Traditional Methods**:
+- Intensity thresholding combined with morphological filtering
+- Fuzzy C-means clustering for density-based segmentation
+- Shape-based filtering to reduce non-nodule candidates
+
+**Deep Learning Approach** (Modern Standard):
+- Use 3D U-Net or similar encoder-decoder architectures
+- Extract nodule segmentation masks from network predictions
+- Apply post-processing to refine candidate boundaries
+
+**False Positive Reduction**:
+- Morphological filtering (remove thin, elongated structures)
+- Connected-component analysis (size filtering)
+- Juxta-pleural nodule handling (specialized CNN for edge-attached nodules)
+
+**[📖 Complete Code Example**: `medical_segmentation_augmentation/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/medical_segmentation_augmentation/) - Advanced segmentation with medical constraints]
+
+##### **7. Normalization for Deep Learning**
+
+Before feeding to neural networks, voxel intensities are standardized to improve model training stability and convergence.
+
+**Min-Max Normalization** (Most Common):
+```
+normalized = (clipped_HU - (-1200)) / (600 - (-1200))
+normalized = (clipped_HU + 1200) / 1800
+Result: Values in [0, 1] range
+```
+
+**Z-Score Normalization** (Alternative):
+```
+mean = mean of all training data HU values
+std = standard deviation
+normalized = (HU - mean) / std
+Result: Zero-centered, unit variance
+```
+
+**Why Normalization?**
+- Improves gradient flow during backpropagation
+- Reduces internal covariate shift
+- Speeds up model convergence
+- Ensures consistent model input regardless of patient/scanner variations
+
+##### **8. Patch Extraction and Final Preprocessing**
+
+Depending on network architecture, normalized CT volumes are processed into fixed-size patches.
+
+**Common Patch Strategies**:
+- **Small patches** (32×32×32): High memory efficiency, local context
+- **Medium patches** (64×64×64): Balance between context and memory
+- **Large patches** (128×128×128): Global context, more GPU memory required
+
+**Multi-Scale Approach**:
+- Extract patches at multiple resolutions simultaneously
+- Captures both fine nodule details and surrounding context
+- Improves detection sensitivity, especially for small nodules
+
+#### **Complete Preprocessing Pseudocode**
+
+```python
+# 1. Load and convert to HU
+dicom = load_dicom(filepath)
+hu_array = dicom.pixel_array * dicom.RescaleSlope + dicom.RescaleIntercept
+
+# 2. Clip HU range
+hu_clipped = np.clip(hu_array, -1200, 600)
+
+# 3. Resample to isotropic
+hu_resampled = resample_cubic_spline(hu_clipped, target_spacing=(1, 1, 1))
+
+# 4. Lung window
+windowed = apply_lung_window(hu_resampled, level=-600, width=1500)
+
+# 5. Enhance with CLAHE
+enhanced = clahe(windowed, clip_limit=2.0, tile_size=8)
+
+# 6. Segment lungs
+lung_mask = segment_lungs(enhanced)  # Threshold -500 + morphology
+
+# 7. Extract nodule candidates
+nodules = extract_nodules(enhanced, lung_mask)
+
+# 8. Normalize
+normalized = (hu_clipped + 1200) / 1800  # [0, 1] range
+
+# 9. Extract patches
+patches = extract_patches(normalized, lung_mask, patch_size=64)
+```
+
+#### **Clinical Quality Control**
+
+**Lung-RADS Screening Criteria** (For context):
+- **Positive Test**: Solid nodules ≥ 6 mm
+- **Follow-up**: New nodules ≥ 4 mm or new part-solid nodules
+- **High Risk**: Nodules with spiculation or pleural attachment
+
+**Preprocessing Validation Checklist**:
+- ✓ Verify slice thickness < 3 mm
+- ✓ Confirm HU clipping within [-1200, +600]
+- ✓ Check resampling to 1×1×1 mm³ isotropic
+- ✓ Validate lung segmentation mask coverage (typically 95%+ of visible lung)
+- ✓ Ensure normalization to [0, 1] or zero-centered
+- ✓ Confirm no data leakage between train/test sets
 
 ---
 
@@ -466,8 +668,13 @@ Different MRI sequences provide complementary tissue information:
 | **White Matter Lesions** | Low contrast         | High contrast     | Very high contrast | Variable          |
 | **Acute Infarction**     | Not obvious early    | High signal early | High signal        | Diffusion limited |
 
-![MRI Multi-sequence Comparison](https://www.researchgate.net/publication/349327938/figure/fig2/AS:989495652872194@1614926665094/Different-MRI-sequences-show-the-same-brain-tumor-The-T1-weighted-image-provides.ppm)
-*Comparison of different MRI sequences for the same brain tumor, showing complementary information*
+![MRI Multi-sequence ](/images/ch05/MRI-BraTS2020.png)
+*Exemplary images depicting a WHO Grade IV Glioblastoma Multiforme (GBM) from the Multimodal Brain Tumor Segmentation Challenge (BraTS) 2020 dataset: Each row shows the axial, coronal and a sagittal view of each of the T1, T1CE, T2 and FLAIR sequences as well as the expert segmentation of the tumor (SEG): Necrotic core and non-enhancing tumor (center, dark grey), enhancing tumor (white, surrounding the necrotic core), peritumoral edema (light grey).*
+*Source: [Optimal acquisition sequence for AI-assisted brain tumor segmentation under the constraint of largest information gain per additional MRI sequence](https://www.sciencedirect.com/science/article/pii/S2772528622000152)*
+
+![MRI2](/images/ch05/MRI2.png)
+*Sample images of the BrTMHD-2023 Dataset*
+*Source: [Brain tumor detection and classification in MRI using hybrid ViT and GRU model with explainable AI in Southern Bangladesh](https://www.nature.com/articles/s41598-024-71893-3)*
 
 #### Multi-sequence Fusion Methods
 
@@ -514,8 +721,11 @@ The physical principles of X-ray imaging determine its contrast limitations:
 3. **Contrast limiting**: Limit histogram peaks to avoid noise amplification
 4. **Bilinear interpolation**: Use bilinear interpolation at block boundaries for smooth transition
 
-![CLAHE Effect Comparison](https://www.researchgate.net/publication/329926497/figure/fig2/AS:707726086393860@1545445274664/Comparison-of-CHEST-X-RAY-image-enhanced-with-CLAHE.png)
+![CLAHE Effect Comparison](/images/ch05/Comparison-of-CHEST-X-RAY-image-enhanced-with-CLAHE.png.png)
 *CLAHE enhancement before and after comparison: left image is original chest X-ray, right image is after CLAHE enhancement*
+*Source: [Binary Classification of Pneumonia in Chest X-Ray Images Using
+Modified Contrast-Limited Adaptive Histogram
+Equalization Algorithm](https://www.mdpi.com/1424-8220/25/13/3976)*
 
 #### CLAHE Implementation and Optimization
 
@@ -792,8 +1002,9 @@ def elastic_transform_3d(image, alpha, sigma, order=1):
     return distorted
 ```
 
-![Data Augmentation Effects](https://miro.medium.com/v2/resize:fit:1400/1*RjT1_pYfjA3m4WJyAInj6Q.png)
-*Medical image data augmentation effects: from left to right are original image, rotation, elastic deformation, brightness adjustment*
+![Data Augmentation Effects](/images/ch05/medical-aug-ct.png)
+*Medical image data augmentation effects*
+*Source: [Pneumonia detection data augmentation with KAGGLE RSNA challenge](https://www.kaggle.com/code/pastorsoto/pneumonia-detection-data-augmentation)*
 
 ---
 
