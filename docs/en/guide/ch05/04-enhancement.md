@@ -53,7 +53,58 @@ Augmentation complete:
 
 **Algorithm Analysis:** Medical image augmentation increases training data diversity through geometric and intensity transformations. The execution results show that CT image rotation is limited to ±5°, translation range to ±5%, ensuring anatomical structure reasonableness. Elastic deformation parameters (α=1000, σ=8) provide moderate deformation intensity while increasing data diversity and maintaining clinical significance. Noise addition simulates electronic noise from real CT acquisition, improving model robustness.
 
-    **Core Principles of Medical Image Augmentation:**
+### Medical Constraints Framework for Augmentation
+
+#### Three-Level Medical Constraints
+
+Medical image augmentation must satisfy three critical constraint levels, distinguishing it fundamentally from natural image augmentation:
+
+##### Level 1: Anatomical Integrity Constraints
+- **Anatomical Structure Preservation**: Transformations must respect anatomical relationships that are fixed in nature
+- **Organ Boundary Maintenance**: Cannot distort organ boundaries beyond physiological limits
+- **Spatial Relationship Preservation**: Relative positions between organs must remain consistent
+- **Examples of violations**: Extreme rotation (>15°) violates natural head/body alignment; displacement >10% of image size may violate vascular path physics
+
+##### Level 2: Pathology Authenticity Constraints
+- **Lesion Feature Preservation**: Pathological features must remain recognizable and clinically relevant
+- **Disease Pattern Consistency**: Augmentation cannot create unrealistic disease morphologies
+- **Progression Plausibility**: Augmented pathology must follow realistic disease progression patterns
+- **Examples of violations**: Noise addition that obscures lesion boundaries; intensity changes that make disease undiagnosable; rotation that prevents radiologist recognition
+
+##### Level 3: Clinical Applicability Constraints
+- **Acquisition Method Realism**: Augmentation must simulate realistic variations from actual acquisition protocols
+- **Equipment Variation Simulation**: Can model different scanner generations, but not physically impossible scenarios
+- **Clinical Decision Impact**: Augmentation must not change clinical decision thresholds
+- **Examples of violations**: Creating image quality worse than worst clinical scenario; simulating artifacts from non-existent equipment; introducing noise patterns never seen clinically
+
+#### Modality-Specific Augmentation Requirements
+
+| Imaging Modality | Key Challenge | Recommended Augmentation | Prohibited Operations | Clinical Validation | Risk Level |
+|---|---|---|---|---|---|
+| **CT** | Preserve HU values physical meaning | Window/level adjustment, elastic deformation (±5°), noise injection | Extreme rotation (>10°), arbitrary intensity scaling | Compare with multi-protocol scans | HIGH |
+| **MRI** | Preserve sequence-specific contrast | Intensity transformation within sequence range, elastic deformation, motion simulation | Sequence mixing, arbitrary signal inversion | Ensure tissue T1/T2 relationships intact | HIGH |
+| **X-ray** | Preserve projection geometry and density | Elastic deformation (mild), intensity variation, noise addition | Geometric distortion (>15°), extreme scaling | Ensure silhouettes match radiological signs | MEDIUM |
+| **Ultrasound** | Preserve speckle patterns | Speckle reduction, gain adjustment, focal point variation | Remove speckle completely, change beam angle | Maintain acoustic shadow/enhancement patterns | MEDIUM |
+
+##### Clinical Validation Requirement
+
+**Critical Requirement**: All augmentation strategies must undergo radiologist verification to ensure they produce clinically realistic variations rather than introducing non-clinical artifacts.
+
+- **Validation Process**:
+  1. Generate augmented image samples
+  2. Radiologist review and classification
+  3. Compare with real clinical variants
+  4. Approve if indistinguishable from clinical reality
+
+- **Approval Criteria**:
+  - ✓ Augmentation creates realistic clinical variants
+  - ✓ No introduction of non-clinical artifacts
+  - ✓ Pathological features remain diagnostically relevant
+  - ✗ Reject if clinically non-realistic
+
+---
+
+### Core Principles of Medical Image Augmentation:
 
 1. **Anatomical Reasonableness**: Transformations must maintain correct anatomical relationships
 2. **Pathology Preservation**: Do not alter or obscure key pathological features
@@ -1462,6 +1513,47 @@ def super_resolution_case_study(lr_images, hr_images, model):
 - **Adaptive augmentation**: Automatically select best strategies based on image content
 - **Cross-modal augmentation**: Use multi-modal information to improve image quality
 - **Federated learning augmentation**: Distributed data augmentation and privacy protection
+
+---
+
+## 🔗 Typical Medical Datasets and Paper URLs Related to This Chapter
+
+### Datasets
+
+| Dataset | Purpose | Official URL | License | Notes |
+| --- | --- | --- | --- | --- |
+| **BraTS** | Brain Tumor Multi-sequence MRI Enhancement | https://www.med.upenn.edu/cbica/brats/ | Academic use free | Most authoritative brain tumor dataset |
+| **LUNA16** | Lung Nodule Detection CT Enhancement Validation | https://luna16.grand-challenge.org/ | Public | Standard lung nodule dataset |
+| **FastMRI** | MRI Fast Reconstruction Dataset | https://fastmri.med.nyu.edu/ | Apache 2.0 | Accelerated MRI reconstruction benchmark dataset |
+| **Medical Segmentation Decathlon** | Multi-modality Medical Image Enhancement | https://medicaldecathlon.com/ | CC BY-SA 4.0 | 10 organs' CT/MRI datasets |
+| **IXI** | Brain MRI Multi-center Data | https://brain-development.org/ixi-dataset/ | CC BY-SA 3.0 | 600 multi-center brain MRI data |
+| **OpenNeuro** | Open Neuroimaging Data | https://openneuro.org/ | CC0 | Contains fMRI, DTI and other neuroimaging data |
+| **TCIA** | Cancer Imaging Archive | https://www.cancerimagingarchive.net/ | Public | Contains imaging data for various cancer types |
+| **QIN** | Quality Assurance Network Data | https://imagingcommons.cancer.gov/qin/ | Public | Contains various cancer imaging and phenotype data |
+| **MIDRC** | COVID-19 Imaging Data | https://midrc.org/ | Public | COVID-19 chest X-ray and CT dataset |
+
+### Papers
+
+| Paper Title | Keywords | Source | Notes |
+| --- | --- | --- | --- |
+| **Generative Adversarial Networks in Medical Image Augmentation: A review** | Medical GAN augmentation review | [ScienceDirect Computers in Biology and Medicine](https://www.sciencedirect.com/science/article/pii/S0010482522001743) | Comprehensive review of GAN applications in medical image augmentation |
+| **A Review of Deep Learning in Medical Imaging: Imaging Traits, Technology Trends, Case Studies With Progress Highlights, and Future Promises** | Deep learning medical enhancement review | [IEEE Explore](https://ieeexplore.ieee.org/document/9363915) | Deep learning review in medical image enhancement |
+| **Application of Super-Resolution Convolutional Neural Network for Enhancing Image Resolution in Chest CT** | Super-resolution enhancement | [Springer Journal of Digital Imaging](https://link.springer.com/article/10.1007/s10278-017-0033-z) | Application of SRCNN in medical image super-resolution |
+| **Generative adversarial network in medical imaging: A review** | Medical GAN synthesis review | [Medical Image Analysis](https://www.sciencedirect.com/science/article/pii/S1361841518308430) | Latest progress of GAN in medical image synthesis |
+| **Learning deconvolutional deep neural network for high resolution medical image reconstruction** | Deconvolution network super-resolution | [Information Sciences](https://www.sciencedirect.com/science/article/pii/S0020025518306273) | Application of deconvolutional network in medical image super-resolution |
+
+### Open Source Libraries
+
+| Library | Function | GitHub/Website | Purpose |
+| --- | --- | --- | --- |
+| **TorchIO** | Medical Image Transformation Library | https://torchio.readthedocs.io/ | Medical image data augmentation |
+| **Albumentations** | Medical Image Augmentation | https://albumentations.ai/ | General image augmentation |
+| **SimpleITK** | Medical Image Processing | https://www.simpleitk.org/ | Image processing toolkit |
+| **MONAI** | Deep Learning Medical AI | https://monai.io/ | Medical imaging deep learning |
+| **ANTsPy** | Image Registration and Analysis | https://github.com/ANTsX/ANTsPy | Advanced image analysis |
+| **medpy** | Medical Image Processing | https://github.com/loli/medpy | Medical imaging algorithm library |
+| **Catalyst** | Deep Learning Framework | https://github.com/catalyst-team/catalyst | Framework for deep learning research |
+| **albumentations** | Fast Image Augmentation | https://github.com/albu/albumentations | Image augmentation library |
 
 ---
 

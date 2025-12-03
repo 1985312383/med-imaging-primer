@@ -169,19 +169,220 @@ def detect_metal_artifacts(image, threshold=3000):
 
 [📖 **完整代码示例**: `detect_metal_artifacts/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/detect_metal_artifacts/) - 包含完整的金属伪影检测算法、连通性分析和可视化功能]
 
-### 实际案例：肺癌筛查的预处理
+### 实际案例：[Preparing CT imaging datasets for deep learning in lung nodule analysis: Insights from four well-known datasets - 为深度学习中的肺结节分析准备CT数据集：四个著名数据集的见解](https://pmc.ncbi.nlm.nih.gov/articles/PMC10361226/pdf/main.pdf)
 
-![CT肺结节预处理流程](https://ars.els-cdn.com/content/image/1-s2.0-S1361841515000035-gr3.jpg)
-*CT肺结节检测的预处理流程：从原始DICOM到模型输入*
+下面的综合流程代表了LUNA16和类似肺结节检测数据集使用的临床标准。
 
-**完整预处理流程：**
-1. **DICOM读取**：提取像素数据和HU值校准信息
-2. **HU值转换**：应用rescale slope和intercept
-3. **肺部区域提取**：基于HU值阈值和连通性分析
-4. **重采样**：统一到各向同性分辨率（如1mm³）
-5. **窗宽窗位**：应用肺窗（窗位-600，窗宽1500）
-6. **归一化**：映射到[0, 1]范围
-7. **尺寸调整**：裁剪或padding到固定尺寸
+![Image preprocessing steps may be involved in different tasks - 不同任务中可能涉及的图像预处理步骤](/images/ch05/lung_CT.png)
+*图：不同任务中可能涉及的图像预处理步骤*
+
+#### **逐步预处理流程**
+
+##### **1. DICOM数据读取和HU值转换**
+
+原始DICOM文件包含必须转换为Hounsfield单位（HU值）的像素数据，这是CT成像的标准强度标度。
+
+**处理过程**：
+- 从DICOM文件中提取像素数据
+- 应用重新缩放截距和斜率：**HU = 像素值 × 斜率 + 截距**
+- 验证HU值范围（通常-1000到+3000 HU）
+- 验证层厚 < 3 mm以确保结节检测精度
+
+**临床参考值**：
+- 空气：**-1000 HU**
+- 肺组织：**-400到-600 HU**
+- 脂肪：**-50到-100 HU**
+- 水：**0 HU**
+- 骨：**+400到+1000 HU**
+
+##### **2. HU值截断和范围标准化**
+
+为了集中于相关的解剖结构并改进模型训练稳定性，HU值被截断到特定范围。
+
+**标准截断范围**（LUNA16标准）：
+- **下限**：**-1200 HU**（捕获充气区域和肺组织）
+- **上限**：**+600 HU**（包括结节衰减范围）
+- **公式**：`截断的HU值 = np.clip(HU值, -1200, 600)`
+
+该范围包括：
+- 实心结节：HU值 ≥ -300（最大衰减）
+- 磨玻璃结节：HU值 < -300（衰减减少）
+- 恶性病变：平均HU值30-50，最大值 < 150
+
+**[📖 完整代码示例**: `clip_hu_values/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/clip_hu_values/) - HU值截断与临床验证]
+
+##### **3. 肺窗和对比度增强**
+
+肺窗设置优化了肺实质内结节的可视化。
+
+**标准肺窗设置**：
+- **窗位（WL）**：**-600 HU**（中心）
+- **窗宽（WW）**：**1500 HU**（范围：-1200到+300 HU）
+
+**替代设置**：
+- 高分辨率：WL = -650，WW = 1500
+- 保守型：WL = -600，WW = 1450
+
+**为什么使用肺窗？**
+- 优化肺组织和结节之间的对比度
+- 抑制会导致假阳性的纵隔结构
+- 与临床放射科医生的观看协议一致
+
+**增强技术**：CLAHE（对比度受限的自适应直方图均衡化）
+- 改进结节可见性而不过度增加噪声
+- 保留组织边界和内部结构
+- 对磨玻璃结节特别有效
+
+##### **4. 等向性重采样**
+
+临床CT扫描通常具有各向异性体素间距（例如0.7 × 0.7 × 5 mm）。重采样到等向性分辨率可改进深度学习模型性能。
+
+**标准目标分辨率**：**1 × 1 × 1 mm³等向性**
+- 确保跨空间维度的统一敏感性
+- 匹配LUNA16数据集标准
+- 允许真正的3D卷积运算
+
+**重采样方法**（推荐）：**三次样条插值**
+- 在保持结节清晰度方面优于三线性插值
+- 使用6点核
+- 保持连续的二阶导数
+- 具有良好的局部和傅里叶特性
+
+**替代插值方法**：
+- **三线性**：线性加权8个相邻体素，速度/质量平衡好
+- **线性**：更快，对肺组织可接受但可能使结节边缘模糊
+- **最近邻**：不推荐（导致混淆伪影和块状外观）
+
+##### **5. 肺实质分割**
+
+分割将肺组织与周围结构隔离，减少非肺区域中的假阳性检测。
+
+**分割流程**：
+
+**步骤1：HU阈值处理**
+- **主要阈值**：-500 HU
+- 二进制化图像以隔离低密度肺组织
+- 将肺与致密的胸部结构（骨、肌肉）分离
+
+**步骤2：形态学操作**
+- **孔洞填充**：关闭肺掩膜内的内部间隙
+- **小物体移除**：消除噪声（< 50像素）
+- **膨胀和腐蚀**：使用球形结构元素进行形态学闭合来细化肺边界
+- **迭代应用**：多次通过改进连续性
+
+**步骤3：连通分量分析**
+- 识别最大的连通分量（左/右肺）
+- 移除肺外区域以减少假阳性
+- 平滑边界以实现精确的体素级分割
+
+**结果**：识别肺实质内体素的二进制肺掩膜
+
+##### **6. 结节候选提取**
+
+在分割的肺区域内，识别和提取结节候选。
+
+**传统方法**：
+- 强度阈值与形态学滤波结合
+- 基于密度的模糊C均值聚类
+- 基于形状的滤波以减少非结节候选
+
+**深度学习方法**（现代标准）：
+- 使用3D U-Net或类似的编码器-解码器架构
+- 从网络预测中提取结节分割掩膜
+- 应用后处理以细化候选边界
+
+**假阳性减少**：
+- 形态学滤波（移除细长结构）
+- 连通分量分析（大小滤波）
+- 胸膜旁结节处理（用于边界附着结节的专门CNN）
+
+**[📖 完整代码示例**: `medical_segmentation_augmentation/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/medical_segmentation_augmentation/) - 具有医学约束的高级分割]
+
+##### **7. 深度学习归一化**
+
+在输入神经网络之前，体素强度被标准化以改进模型训练稳定性和收敛速度。
+
+**最小最大值归一化**（最常见）：
+```
+归一化值 = (截断的HU值 - (-1200)) / (600 - (-1200))
+归一化值 = (截断的HU值 + 1200) / 1800
+结果：[0, 1]范围内的值
+```
+
+**Z分数归一化**（替代方案）：
+```
+平均值 = 所有训练数据HU值的平均值
+标准差 = 标准差
+归一化值 = (HU值 - 平均值) / 标准差
+结果：零均值、单位方差
+```
+
+**为什么要归一化？**
+- 改进反向传播中的梯度流
+- 减少内部协变量偏移
+- 加快模型收敛速度
+- 确保与患者/扫描仪变化无关的一致模型输入
+
+##### **8. 补丁提取和最终预处理**
+
+根据网络架构，归一化的CT体积被处理成固定大小的补丁。
+
+**常见补丁策略**：
+- **小补丁**（32×32×32）：内存效率高，局部上下文
+- **中等补丁**（64×64×64）：上下文和内存之间的平衡
+- **大补丁**（128×128×128）：全局上下文，需要更多GPU内存
+
+**多尺度方法**：
+- 同时在多个分辨率提取补丁
+- 捕获细微的结节细节和周围上下文
+- 改进检测敏感性，特别是对于小结节
+
+#### **完整预处理伪代码**
+
+```python
+# 1. 加载并转换为HU值
+dicom = load_dicom(文件路径)
+hu_数组 = dicom.像素数组 * dicom.重新缩放斜率 + dicom.重新缩放截距
+
+# 2. 截断HU范围
+hu_截断 = np.clip(hu_数组, -1200, 600)
+
+# 3. 重采样为等向性
+hu_重采样 = 重采样三次样条(hu_截断, 目标间距=(1, 1, 1))
+
+# 4. 肺窗
+窗口化 = 应用肺窗(hu_重采样, 位置=-600, 宽度=1500)
+
+# 5. 使用CLAHE增强
+增强 = clahe(窗口化, 截断限制=2.0, 瓦片大小=8)
+
+# 6. 分割肺
+肺掩膜 = 分割肺(增强)  # 阈值-500 +形态学
+
+# 7. 提取结节候选
+结节 = 提取结节(增强, 肺掩膜)
+
+# 8. 归一化
+归一化 = (hu_截断 + 1200) / 1800  # [0, 1]范围
+
+# 9. 提取补丁
+补丁 = 提取补丁(归一化, 肺掩膜, 补丁大小=64)
+```
+
+#### **临床质量控制**
+
+**Lung-RADS筛查标准**（用于参考）：
+- **阳性测试**：实心结节 ≥ 6 mm
+- **随访**：新结节 ≥ 4 mm或新的部分实心结节
+- **高风险**：具有毛刺或胸膜附着的结节
+
+**预处理验证清单**：
+- ✓ 验证层厚 < 3 mm
+- ✓ 确认HU截断在[-1200, +600]内
+- ✓ 检查重采样为1×1×1 mm³等向性
+- ✓ 验证肺分割掩膜覆盖率（通常> 95%的可见肺）
+- ✓ 确保归一化为[0, 1]或零均值
+- ✓ 确认训练/测试集之间没有数据泄漏
 
 ---
 
@@ -366,9 +567,8 @@ N4ITK偏场校正参数设置:
 [📖 **完整代码示例**: `n4itk_bias_correction/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/n4itk_bias_correction/) - 包含完整的N4ITK偏场校正实现、测试用例、合成数据生成和可视化功能]
   校正图像 - 均值: 0.247, 标准差: 0.076, CV: 0.308
   CV减少: 15.2%, 标准差减少: 14.6%
-```
 
-![N4ITK偏场校正结果](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/n4itk_bias_correction/output/bias_field_visualization_division.png)
+![N4ITK偏场校正结果](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/n4itk_bias_correction/output/bias_field_visualization_division.png)
 *N4ITK偏场校正效果：左图为原始图像（含偏场场），中图为估计的偏场场，右图为校正后的图像。校正后图像强度更加均匀，同质组织的强度一致性显著提高。*
 
 **算法分析：** N4ITK算法通过B样条基函数建模偏场场，使用迭代优化方法最小化能量函数。从运行结果可以看出，经过28次迭代后算法收敛，变异系数(CV)从0.363降低到0.308，减少了15.2%，有效改善了MRI图像的强度不均匀性。
@@ -418,7 +618,7 @@ White Stripe标准化开始 (方法: T1)
   标准化范围: [0.000, 1.000]
 ```
 
-![White Stripe标准化结果](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/white_stripe_normalization/output/white_stripe_t1_normalization.png)
+![White Stripe标准化结果](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/white_stripe_normalization/output/white_stripe_t1_normalization.png)
 *White Stripe标准化效果：左上图为原始T1图像，右上图为标准化结果，左下图为差异对比，右下图为统计分析。标准化后图像强度范围统一到[0,1]，不同扫描间的强度一致性显著改善。*
 
 **算法分析：** White Stripe算法利用脑部MRI中白质信号相对稳定的特性，通过直方图分析自动识别白质强度范围。从运行结果可以看出，算法在第2次迭代后即收敛，识别出白质均值为0.444。标准化后，不同MRI扫描的图像强度被映射到统一的[0,1]范围，为后续的深度学习模型提供了标准化的输入。
@@ -436,8 +636,13 @@ White Stripe标准化开始 (方法: T1)
 | **白质病变**   | 低对比     | 高对比     | 极高对比 | 可变     |
 | **急性梗死**   | 早期不明显 | 早期高信号 | 高信号   | 弥散受限 |
 
-![MRI多序列对比](https://www.researchgate.net/publication/349327938/figure/fig2/AS:989495652872194@1614926665094/Different-MRI-sequences-show-the-same-brain-tumor-The-T1-weighted-image-provides.ppm)
-*同一脑肿瘤的不同MRI序列对比，显示互补信息*
+![MRI Multi-sequence - MRI多序列对比](/images/ch05/MRI-BraTS2020.png)
+*展示WHO IV级胶质母细胞瘤（GBM）的BraTS 2020数据集代表性图像：每行显示T1、T1CE、T2和FLAIR序列的轴向、冠状面和矢状面视图以及专家分割的肿瘤（SEG）：坏死核心和非增强肿瘤（中心，深灰色）、增强肿瘤（白色，环绕坏死核心）、瘤周水肿（浅灰色）*
+*图片来源: [Optimal acquisition sequence for AI-assisted brain tumor segmentation under the constraint of largest information gain per additional MRI sequence - 在每次额外MRI序列最大信息增益约束下用于AI辅助脑肿瘤分割的最优获取序列](https://www.sciencedirect.com/science/article/pii/S2772528622000152)*
+
+![MRI2](/images/ch05/MRI2.png)
+*BrTMHD-2023数据集的示例图像*
+*图片来源: [Brain tumor detection and classification in MRI using hybrid ViT and GRU model with explainable AI in Southern Bangladesh - 孟加拉国南部使用混合ViT和GRU模型与可解释AI进行MRI脑肿瘤检测和分类](https://www.nature.com/articles/s41598-024-71893-3)*
 
 #### 多序列融合方法
 
@@ -458,7 +663,7 @@ class MultisequenceFusion:
         return fused_image
 ```
 
-[📖 **完整代码示例**: `multisequence_fusion_channels/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/multisequence_fusion_channels/) - 包含完整的多序列融合实现、重采样算法和可视化功能]
+[📖 **完整代码示例**: `multisequence_fusion/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/) - 包含不同的多序列MRI融合策略实现
 
 **运行结果分析：**
 
@@ -486,7 +691,7 @@ class MultisequenceFusion:
   融合统计: 均值=0.000, 标准差=1.000
 ```
 
-![多序列MRI融合结果](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/multisequence_fusion_channels/output/multisequence_fusion_result.png)
+![多序列MRI融合结果](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/multisequence_fusion_channels/output/multisequence_fusion_result.png)
 *多序列MRI融合效果：展示了T1、T2、FLAIR和DWI四种序列的融合结果。不同序列提供互补的组织信息，融合后的图像包含了更丰富的诊断信息。*
 
 **算法分析：** 多序列融合通过将不同MRI序列的信息整合，提高了诊断的准确性。从运行结果可以看出，四种序列（T1、T2、FLAIR、DWI）被成功融合为一个4通道的图像。每个序列都经过Z-score标准化，确保强度范围的统一。融合后的图像保留了各个序列的互补信息，为深度学习模型提供了更全面的输入特征。
@@ -531,8 +736,9 @@ X射线成像的物理原理决定了其对比度限制：
 3. **对比度限制**：限制直方图峰值，避免噪声放大
 4. **双线性插值**：块边界使用双线性插值平滑过渡
 
-![CLAHE效果对比](https://www.researchgate.net/publication/329926497/figure/fig2/AS:707726086393860@1545445274664/Comparison-of-CHEST-X-RAY-image-enhanced-with-CLAHE.png)
+![CLAHE Effect Comparison - CLAHE效果对比](/images/ch05/Comparison-of-CHEST-X-RAY-image-enhanced-with-CLAHE.png.png)
 *CLAHE增强前后对比：左图为原始胸片，右图为CLAHE增强后*
+*图片来源: [Comparison of CEST X-RAY image enhanced with CLAHE - 使用CLAHE增强的X光胸片效果对比](https://www.researchgate.net/publication/329926497/figure/fig2/AS:707726086393860@1545445274664/Comparison-of-CHEST-X-RAY-image-enhanced-with-CLAHE.png)*
 
 #### CLAHE实现与优化
 
@@ -811,8 +1017,9 @@ def elastic_transform_3d(image, alpha, sigma, order=1):
     return distorted
 ```
 
-![数据增强效果](https://miro.medium.com/v2/resize:fit:1400/1*RjT1_pYfjA3m4WJyAInj6Q.png)
+![Data Augmentation Effects - 数据增强效果](/images/ch05/medical-aug-ct.png)
 *医学影像数据增强效果：从左到右依次为原始图像、旋转、弹性变形、亮度调整*
+*图片来源: [Data Augmentation Effects in Medical Imaging - 医学影像中的数据增强效果](https://miro.medium.com/v2/resize:fit:1400/1*RjT1_pYfjA3m4WJyAInj6Q.png)*
 
 ---
 
@@ -917,7 +1124,7 @@ def validate_preprocessing(original_image, processed_image, roi_mask=None):
 
 ### MRI偏场场可视化与校正
 
-![MRI偏场场可视化](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/visualize_bias_field/output/bias_field_visualization_division.png)
+![MRI偏场场可视化](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/visualize_bias_field/output/bias_field_visualization_division.png)
 *MRI偏场场可视化：左图为原始图像，中图为估计的偏场场，右图为校正后图像*
 
 **偏场场校正效果对比：**
@@ -925,12 +1132,12 @@ def validate_preprocessing(original_image, processed_image, roi_mask=None):
 - 同态方法：MSE=0.1984, PSNR=7.0dB, SSIM=0.149
 - 多项式方法：MSE=0.0663, PSNR=11.8dB, SSIM=0.545
 
-![多种偏场场校正方法对比](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/visualize_bias_field/output/bias_field_methods_comparison.png)
+![多种偏场场校正方法对比](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/visualize_bias_field/output/bias_field_methods_comparison.png)
 *不同偏场场校正方法的性能对比，显示多项式方法在此例中表现最佳*
 
 ### White Stripe强度标准化
 
-![White Stripe标准化结果](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/white_stripe_normalization/output/white_stripe_t1_normalization.png)
+![White Stripe标准化结果](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/white_stripe_normalization/output/white_stripe_t1_normalization.png)
 *White Stripe强度标准化：展示了原始图像、标准化结果、差异对比和统计分析*
 
 **不同MRI序列的标准化效果：**
@@ -938,12 +1145,12 @@ def validate_preprocessing(original_image, processed_image, roi_mask=None):
 - T2序列：白质像素6个，标准化后均值0.886
 - FLAIR序列：白质像素10个，标准化后均值0.888
 
-![多模态MRI标准化对比](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/white_stripe_normalization/output/white_stripe_modality_comparison.png)
+![多模态MRI标准化对比](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/white_stripe_normalization/output/white_stripe_modality_comparison.png)
 *不同MRI序列的White Stripe标准化效果对比，显示各序列的强度分布和标准化结果*
 
 ### CLAHE对比度增强
 
-![CLAHE参数对比](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/clahe_enhancement/output/clahe_parameter_comparison.png)
+![CLAHE参数对比](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/clahe_enhancement/output/clahe_parameter_comparison.png)
 *不同CLAHE参数的效果对比，从弱增强到最强增强的渐进效果*
 
 **CLAHE增强效果定量评估：**
@@ -953,12 +1160,12 @@ def validate_preprocessing(original_image, processed_image, roi_mask=None):
 - 边缘强度提升倍数：18.19
 - PSNR：28.05 dB，SSIM：0.566
 
-![CLAHE详细分析](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/clahe_enhancement/output/clahe_detailed_analysis.png)
+![CLAHE详细分析](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/clahe_enhancement/output/clahe_detailed_analysis.png)
 *CLAHE增强的详细分析，包括边缘检测、强度分布和增强效果评估*
 
 ### CT HU值截断处理
 
-![HU值截断对比](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/clip_hu_values/output/hu_clipping_软组织范围.png)
+![HU值截断对比](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/clip_hu_values/output/hu_clipping_软组织范围.png)
 *CT HU值截断：展示软组织范围(-200, 400 HU)的截断效果*
 
 **不同截断策略的效果：**
@@ -969,7 +1176,7 @@ def validate_preprocessing(original_image, processed_image, roi_mask=None):
 
 ### 金属伪影检测
 
-![金属伪影检测结果](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/detect_metal_artifacts/output/metal_artifact_detection.png)
+![金属伪影检测结果](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/detect_metal_artifacts/output/metal_artifact_detection.png)
 *CT金属伪影检测结果：自动检测金属区域并评估伪影严重程度*
 
 **不同阈值的检测效果：**
@@ -979,7 +1186,7 @@ def validate_preprocessing(original_image, processed_image, roi_mask=None):
 | 3000     | 2          | 165        | 0.02% | 轻微     |
 | 4000     | 2          | 133        | 0.01% | 轻微     |
 
-![金属伪影阈值对比](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/detect_metal_artifacts/output/metal_threshold_comparison.png)
+![金属伪影阈值对比](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/detect_metal_artifacts/output/metal_threshold_comparison.png)
 *不同HU阈值对金属伪影检测效果的影响对比*
 
 ### 实际应用建议
@@ -1035,6 +1242,43 @@ def validate_preprocessing(original_image, processed_image, roi_mask=None):
    - 自动化异常检测
    - 专家验证流程
    - 版本控制和可重现性
+
+---
+
+## 🔗 本章节相关的典型医学数据集和论文网址与开源库
+
+### 数据集
+
+| 数据集              | 用途                  | 官方网址                                                 | 许可证       | 备注                 |
+| ------------------- | --------------------- | -------------------------------------------------------- | ------------ | -------------------- |
+| **BraTS**     | 脑肿瘤 MRI 多序列     | https://www.med.upenn.edu/cbica/brats/                   | 学术用途免费 | 最权威的脑肿瘤数据集 |
+| **LUNA16**    | 肺结节检测 CT        | https://luna16.grand-challenge.org/                      | 公开         | 肺结节标准数据集     |
+| **ChexPert**  | 胸部 X 光            | https://stanfordmlgroup.github.io/competitions/chexpert/ | CC-BY 4.0    | Stanford 标准数据集  |
+| **NIH CXR14** | 胸部 X 光            | https://nihcc.app.box.com/v/ChestX-ray14                 | 公开         | 包含疾病标签         |
+| **TCIA**      | 多种模态肿瘤数据     | https://www.cancerimagingarchive.net/                    | 公开         | 肿瘤影像数据集       |
+| **OpenI**     | 胸部X光与放射报告    | https://openi.nlm.nih.gov/                              | 公开         | 包含放射报告关联     |
+
+### 论文
+
+| **论文标题** | **关键字段** | **来源** | **备注** |
+| --- | --- | --- | --- |
+| Preparing CT imaging datasets for deep learning in lung nodule analysis: Insights from four well-known datasets | CT成像数据集准备 | [Heliyon](https://www.sciencedirect.com/science/article/pii/S2405844023043128) | 肺结节CT数据集深度学习准备指南 |
+| Hounsfield unit (HU) value truncation and range standardization | HU值截断与标准化 | [医学影像预处理标准](https://radiopaedia.org/articles/hounsfield-unit) | CT影像强度标准化理论基础 |
+| CLAHE (Contrast Limited Adaptive Histogram Equalization) | CLAHE对比度增强 | [ IEEE Transactions on Image Processing 1997](https://ieeexplore.ieee.org/document/109340) | 限制对比度自适应直方图均衡化 |
+| U-Net: Convolutional Networks for Biomedical Image Segmentation | U-Net架构 | [MICCAI 2015](https://doi.org/10.1007/978-3-319-24574-4_28) | 医学图像分割经典网络 |
+| A review of deep learning in medical imaging: Imaging traits, technology trends, case studies with progress highlights, and future promises | 深度学习医学影像综述 | [arxiv](https://arxiv.org/pdf/2008.09104) | 医学影像深度学习技术综述 |
+
+
+### 开源库
+
+| 库名称                   | 功能           | GitHub/官网                     | 用途             |
+| ------------------------ | -------------- | ------------------------------- | ---------------- |
+| **TorchIO**        | 医学图像变换库 | https://torchio.readthedocs.io/ | 医学图像数据增强 |
+| **albumentations** | 医学图像扩展   | https://albumentations.ai/      | 通用图像增强     |
+| **SimpleITK**      | 医学图像处理   | https://simpleitk.org/          | 医学图像处理工具 |
+| **ANTs**           | 医学图像配准   | https://stnava.github.io/ANTs/  | 图像配准与分析   |
+| **MEDpy**          | 医学影像处理   | https://github.com/loli/MEDpy   | 医学影像算法库   |
+| **NiBabel**        | DICOM/NIfTI处理 | https://nipy.org/nibabel/       | 神经影像数据格式 |
 
 ---
 

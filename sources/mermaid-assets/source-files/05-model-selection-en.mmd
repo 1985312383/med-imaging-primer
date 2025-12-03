@@ -1,0 +1,53 @@
+%% Title: Medical Image Analysis Model Selection Guide
+%% Description: Select appropriate deep learning models based on data type and task type
+%% File: 05-model-selection-en.mmd
+
+flowchart TD
+    A["<b>Medical Image Analysis Task</b>"] --> B{"<b>Data Type?</b>"}
+
+    B -->|<font color='#3498db'><b>2D X-ray</b></font>| C{"<b>Task Type?</b>"}
+    B -->|<font color='#27ae60'><b>3D CT/MRI</b></font>| D{"<b>Task Type?</b>"}
+    B -->|<font color='#f39c12'><b>Whole Slide Image</b><br><i>WSI</i></font>| E{"<b>Task Type?</b>"}
+
+    C -->|<font color='#e74c3c'><b>Classification</b></font>| F["<b>ResNet/DenseNet</b><br><i>+ Transfer Learning</i>"]
+    C -->|<font color='#9b59b6'><b>Detection</b></font>| G["<b>Faster R-CNN/YOLO</b><br><i>+ Anchor Adjustment</i>"]
+
+    D -->|<font color='#e74c3c'><b>Classification</b></font>| H["<b>3D ResNet/3D DenseNet</b><br><i>+ Patch-based Training</i>"]
+    D -->|<font color='#27ae60'><b>Segmentation</b></font>| I["<b>3D U-Net/V-Net</b><br><i>+ Skip Connections</i>"]
+
+    E -->|<font color='#e74c3c'><b>Classification</b></font>| J["<b>Attention MIL</b><br><i>+ Tissue Filtering</i>"]
+    E -->|<font color='#9b59b6'><b>Detection</b></font>| K["<b>Patch-level Detection</b><br><i>+ Aggregation</i>"]
+
+    F --> L["<b>Best Practices</b>"]
+    G --> L
+    H --> L
+    I --> L
+    J --> L
+    K --> L
+
+    L --> M["<b>Class Imbalance Handling</b>"]
+    L --> N["<b>Data Augmentation</b>"]
+    L --> O["<b>Ensemble Methods</b>"]
+    L --> P["<b>Cross-validation</b>"]
+
+    %% Styling
+    style A fill:#e8f5e8,stroke:#27ae60,stroke-width:3px,color:#2c3e50
+    style B fill:#fef5e7,stroke:#f39c12,stroke-width:3px,color:#2c3e50
+    style C fill:#fef5e7,stroke:#f39c12,stroke-width:2px,color:#2c3e50
+    style D fill:#fef5e7,stroke:#f39c12,stroke-width:2px,color:#2c3e50
+    style E fill:#fef5e7,stroke:#f39c12,stroke-width:2px,color:#2c3e50
+    style L fill:#fadbd8,stroke:#e74c3c,stroke-width:3px,color:#2c3e50
+
+    style F fill:#fadbd8,stroke:#e74c3c,stroke-width:2px,color:#2c3e50
+    style G fill:#ebdef0,stroke:#9b59b6,stroke-width:2px,color:#2c3e50
+    style H fill:#fadbd8,stroke:#e74c3c,stroke-width:2px,color:#2c3e50
+    style I fill:#d5f4e6,stroke:#27ae60,stroke-width:2px,color:#2c3e50
+    style J fill:#fadbd8,stroke:#e74c3c,stroke-width:2px,color:#2c3e50
+    style K fill:#ebdef0,stroke:#9b59b6,stroke-width:2px,color:#2c3e50
+
+    style M fill:#ebf4fb,stroke:#3498db,stroke-width:2px,color:#2c3e50
+    style N fill:#ebf4fb,stroke:#3498db,stroke-width:2px,color:#2c3e50
+    style O fill:#ebf4fb,stroke:#3498db,stroke-width:2px,color:#2c3e50
+    style P fill:#ebf4fb,stroke:#3498db,stroke-width:2px,color:#2c3e50
+
+    %% Font settings - Using system fonts for compatibility

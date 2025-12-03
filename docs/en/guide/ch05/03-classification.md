@@ -41,9 +41,63 @@ Medical image classification and detection face unique challenges: extreme class
 
 ### Medical Particularities
 
-#### Class Imbalance Problem
+#### Class Imbalance Problem in Medical Imaging
 
-Medical imaging data often has severe class imbalance:
+Class imbalance is a fundamental challenge in medical image classification. Unlike natural image datasets, medical datasets exhibit extreme imbalance due to inherent clinical characteristics.
+
+##### Root Causes of Medical Class Imbalance
+
+1. **Disease Prevalence Characteristics**
+   - Most diseases have very low prevalence in general populations
+   - Example: Cancer typically affects 0.5-2% of screened population
+   - Example: Tuberculosis affects <1% in low-prevalence regions
+   - **Clinical Reality**: Screening data naturally reflects population disease prevalence
+
+2. **Data Collection Bias**
+   - Medical imaging is expensive and resource-intensive
+   - Positive (diseased) cases are actively collected for research
+   - Negative (normal) cases are passively collected from routine screening
+   - **Result**: Dataset distribution is more skewed than true population distribution
+
+3. **Annotation Cost Asymmetry**
+   - Normal cases can be easily labeled as "healthy"
+   - Abnormal cases require expert radiologist review
+   - Complex cases need multiple expert consensus
+   - **Economic Impact**: High cost makes balanced datasets economically unfeasible
+
+##### Severe Impact of Class Imbalance on Model Training
+
+| Impact Category | Problem Description | Consequence | Clinical Risk |
+|---|---|---|---|
+| **Prediction Bias** | Model biased toward majority class | Majority class prediction dominates, minority class ignored | High false negative rate (missing rare diseases) |
+| **Decision Threshold Mismatch** | Decision thresholds optimized for majority class | Minority class confidence scores unreliable | Inappropriate clinical decisions |
+| **Feature Learning Distortion** | Minority class features under-learned | Model learns superficial patterns instead of medical characteristics | Poor generalization to new data |
+| **Evaluation Metric Misleading** | Overall accuracy high even with poor minority class performance | 99% accuracy could mean missing 100% of disease cases if disease is 1% prevalence | False sense of model reliability |
+
+**Concrete Example**:
+- Dataset: 10,000 chest X-rays (9,900 normal, 100 pneumonia)
+- Naive classifier: Always predict "normal" → 99% accuracy ✓ (mathematically correct but clinically useless ✗)
+- Clinical requirement: Sensitivity >95% (detect 95% of pneumonia cases) → Impossible with naive classifier
+
+##### Strategies for Handling Class Imbalance
+
+**Strategy 1: Loss Function Adjustment**
+- Weighted Cross-Entropy: `loss = -w_positive * log(p_positive) - w_negative * log(p_negative)`
+- Recommended weight ratio: Major/Minor class count ratio
+- Focal Loss: Emphasizes hard-to-classify minority samples
+
+**Strategy 2: Data-Level Methods**
+- Oversampling minority class (risk: overfitting)
+- Undersampling majority class (risk: information loss)
+- SMOTE: Synthetic Minority Oversampling Technique
+- Class-balanced sampling in data loader
+
+**Strategy 3: Post-Training Adjustment**
+- Dynamic threshold adjustment for minority class
+- Cost-sensitive prediction thresholds
+- Ensemble methods with class-specific models
+
+##### Code Implementation
 
 ```python
 def analyze_class_imbalance(dataset):
@@ -76,9 +130,40 @@ def analyze_class_imbalance(dataset):
 # }
 ```
 
-#### Uncertainty and Interpretability
+#### Uncertainty and Interpretability in Medical AI
 
-Medical diagnosis requires high interpretability:
+##### Special Requirements for Medical Decision-Making
+
+Medical AI systems differ fundamentally from general-purpose classifiers. Diagnostic support systems must satisfy three core clinical requirements:
+
+1. **Responsibility and Accountability**
+   - Clinician retains final diagnostic authority
+   - AI provides evidence-based recommendations with transparent reasoning
+   - Decision audit trail must be complete and traceable
+   - Legal and ethical responsibility clearly defined
+
+2. **Clinical Decision Support**
+   - Predictions alone are insufficient; reasoning must be visible
+   - Confidence levels guide clinical action thresholds
+   - Uncertainty quantification prevents false confidence
+   - Alternative diagnoses should be presented
+
+3. **Continuous Improvement and Feedback**
+   - Model behavior changes detected through performance monitoring
+   - Drift from training distribution identified automatically
+   - Failure modes documented and addressed systematically
+   - Regular retraining based on new clinical data
+
+##### Multi-Level Requirements for Medical Interpretability
+
+| Interpretability Level | Definition | Clinical Purpose | Implementation Methods | Decision Making Impact |
+|---|---|---|---|---|
+| **Global Explanation** | What visual features does the model consider important across all images? | Understand model's overall diagnostic strategy, validate against medical knowledge | Feature attribution maps, saliency maps, class activation maps | Builds trust in model's medical reasoning |
+| **Local Explanation** | What specific image regions drove the decision for this particular patient? | Explain diagnosis to clinician and patient, support treatment planning | Attention mechanisms, LIME, SHAP, gradient-based methods | Directly supports clinical decision |
+| **Comparative Explanation** | How does this patient's image differ from typical cases of same/different diagnoses? | Differential diagnosis guidance, case-based reasoning | Similarity analysis, exemplar selection, contrastive explanations | Strengthens diagnostic confidence |
+| **Uncertainty Quantification** | How confident is the model? What are confidence ranges? | Determine when to request additional testing, flag ambiguous cases for expert review | Bayesian approaches, ensemble methods, calibration analysis | Prevents overconfidence-related errors |
+
+##### Code Implementation
 
 ```python
 class MedicalClassificationModel(nn.Module):
@@ -114,6 +199,57 @@ class MedicalClassificationModel(nn.Module):
 
 ### X-ray Classification Characteristics
 
+#### Physical Foundations of X-ray Imaging
+
+X-ray classification differs fundamentally from natural images due to the physics of X-ray acquisition:
+
+1. **Projection Imaging Principle**
+   - X-ray images are 2D projections of 3D anatomy
+   - Anatomical structures overlap in projection
+   - Depth information is lost, making separation of overlapping structures challenging
+   - **Clinical Impact**: Subtle lesions may be obscured by overlapping normal structures
+
+2. **Density Resolution Limitations**
+   - X-ray contrast depends on tissue density differences
+   - Soft tissues have similar densities, reducing natural contrast
+   - High-contrast artifacts (metal, bone) can obscure nearby soft tissue
+   - **Technical Challenge**: Limited gray-level range requires careful window/level adjustment
+
+3. **Clinical Diagnostic Patterns**
+   - Radiologists rely on pattern recognition learned through experience
+   - Subtle signs often indicate serious pathology
+   - Large lesions are usually obvious; challenge lies in detecting early disease
+   - **Learning Requirement**: Model must learn clinically relevant subtle features
+
+#### Multi-Level Feature Analysis in X-ray Classification
+
+| Feature Level | Feature Type | Clinical Significance | Examples |
+|---|---|---|---|
+| **Anatomical Level** | Overall organ morphology, silhouettes, proportions | Normal vs pathological anatomy | Cardiac silhouette size, mediastinal width, lung volumes |
+| **Regional Level** | Localized findings within specific anatomical regions | Disease localization | Right vs left lung involvement, apical vs basal distribution |
+| **Texture Level** | Parenchymal patterns, opacity distributions | Tissue pathology type | Ground-glass opacity (infection/inflammation), consolidation (pneumonia) |
+| **Boundary Level** | Sharp vs ill-defined borders, margin characteristics | Lesion benignity vs malignancy | Smooth well-defined shadows vs irregular infiltrates |
+
+#### Anatomy-Specific X-ray Classification Features
+
+**Chest X-ray Classification**:
+- **Global features**: Cardiac silhouette, mediastinal contours, hemidiaphragm positions
+- **Lobar features**: Right/left upper/middle/lower lobe findings
+- **Specialized findings**: Air bronchograms, silhouette sign, halo sign
+- **Clinical decision thresholds**: Cardiac size >50% of thoracic diameter indicates cardiomegaly
+
+**Skeletal X-ray Classification**:
+- **Alignment features**: Fracture angulation, displacement, rotation
+- **Density features**: Bone mineral density assessment, osteoporotic changes
+- **Specialized findings**: Cortical thickening, medullary sclerosis, pathological fractures
+- **Clinical decision thresholds**: >50% displacement indicates unstable fracture
+
+**Abdominal X-ray Classification**:
+- **Air distribution**: Free air detection, bowel gas patterns
+- **Organ silhouettes**: Liver, spleen, kidney visibility
+- **Specialized findings**: Pneumoperitoneum, bowel obstruction signs
+- **Clinical decision thresholds**: Upright film with free air indicates urgent surgery
+
 #### Whole Image Understanding
 
 X-ray classification requires understanding the overall context:
@@ -122,8 +258,9 @@ X-ray classification requires understanding the overall context:
 - **Local features**: Specific lesion signs
 - **Relative positions**: Spatial relationships between anatomical structures
 
-![Chest X-ray classification](https://www.researchgate.net/publication/341837493/figure/fig1/AS:894194425237504@1590191057416/Chest-X-ray-image-classification-using-deep-learning-The-model-learns-automatically-the.ppm)
-*Deep learning-based chest X-ray classification, the model automatically learns disease features*
+![Chest X-ray classification](/images/ch05/CheXNet.png)
+*Architectural design of [CheXNet](https://arxiv.org/pdf/1711.05225) model: Deep learning-based chest X-ray classification, the model automatically learns disease features*
+*Source: [Diagnosis of corona diseases from associated genes and X-ray images using machine learning algorithms and deep CNN](https://doi.org/10.1016/j.imu.2021.100621)*
 
 ### Classic 2D CNN Architectures
 
@@ -1281,6 +1418,12 @@ def calculate_map(detections, ground_truths, iou_threshold=0.5):
 
 #### Task-driven Model Selection
 
+![Medical Image Analysis Model Selection Guide](/images/ch05/05-model-selection-en.png)
+*Figure: Selecting appropriate deep learning models based on medical image data types (2D X-ray, 3D CT/MRI, WSI whole slide images) and task types *
+
+<details>
+<summary>📖 View Original Mermaid Code</summary>
+
 ```mermaid
 flowchart TD
     A[Medical Image Analysis Task] --> B{Data Type?}
@@ -1310,6 +1453,7 @@ flowchart TD
     L --> O[Ensemble Methods]
     L --> P[Cross-validation]
 ```
+</details>
 
 #### Performance Comparison
 
@@ -1350,6 +1494,41 @@ flowchart TD
 - **Multimodal fusion**: Comprehensive analysis combining imaging and clinical data
 - **Weakly supervised learning**: Reducing annotation requirements
 - **Federated learning**: Multi-center collaboration, privacy protection
+
+---
+
+---
+
+## 🔗 Typical Medical Datasets and Paper URLs Related to This Chapter
+
+### Datasets
+
+| Dataset | Purpose | Official URL | License | Notes |
+| --- | --- | --- | --- | --- |
+| **NIH ChestX-ray14** | Chest X-ray Classification Detection | https://nihcc.app.box.com/v/ChestX-ray14 | Public | Contains 14 types of chest disease labels |
+| **CheXpert** | Chest X-ray Classification | https://stanfordmlgroup.github.io/competitions/chexpert/ | CC-BY 4.0 | Stanford standard dataset, with 5 abnormality labels |
+| **MIMIC-CXR** | Chest X-ray Multi-label Classification | https://physionet.org/content/mimic-cxr-jpg/2.0.0/ | MIT License | Real clinical data from Boston Children's Hospital |
+| **PadChest** | Chest X-ray + Clinical Data | https://bimcv.cipf.es/bimcv-projects/padchest/ | CC BY 4.0 | Contains 100,000 X-ray images with clinical reports |
+| **DeepLesion** | Lesion Detection Dataset | https://wiki.cancerimagingarchive.net/pages/viewpage.action?pageId=53683303 | Public | Contains annotated data for various body lesions |
+| **MedicalDecathlon** | Multi-organ Classification Segmentation | https://medicaldecathlon.com/ | CC BY-SA 4.0 | 10 organs' CT/MRI dataset |
+| **ChestX-Ray8** | Chest Disease Classification | https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia | Public | Contains pneumonia, normal X-ray images |
+| **ISIC Archive** | Skin Lesion Classification | https://www.isic-archive.com/#!/topWithHeader/onlyHeaderTop/gallery | Public | Dermoscopy image classification benchmark |
+
+### Papers
+
+| Paper Title | Keywords | Source | Notes |
+| --- | --- | --- | --- |
+| **CheXNet: Radiologist-Level Pneumonia Detection on Chest X-Rays with Deep Learning** | Chest X-ray Pneumonia Detection | [arXiv:1711.05225](https://arxiv.org/abs/1711.05225) | Stanford University, using 121-layer DenseNet |
+| **Focal Loss for Dense Object Detection** | Focal Loss Loss Function | [arXiv:1708.02002](https://arxiv.org/abs/1708.02002) | Classic loss function paper addressing class imbalance |
+
+### Open Source Libraries
+
+| Library | Function | GitHub/Website | Purpose |
+| --- | --- | --- | --- |
+| **MONAI** | Medical Imaging Deep Learning Framework | https://monai.io/ | PyTorch library designed specifically for medical imaging, including classification, detection, and segmentation tools |
+| **TorchIO** | Medical Image Transformation Library | https://torchio.readthedocs.io/ | Supports multiple medical image formats and enhancement transformations |
+| **deepmedic** | 3D Medical Image Classification | https://github.com/DeepMedic/deepmedic | High-performance 3D medical image classification framework, especially suitable for brain images |
+| **Grad-CAM++** | Explainable Visualization | https://github.com/jacobgil/grad-cam-plus-plus | Attention visualization tool for medical image classification |
 
 ---
 

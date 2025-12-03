@@ -136,6 +136,8 @@ def clip_hu_values(image, min_hu=-1000, max_hu=1000):
     return processed_image
 ```
 
+[📖 **Complete Code Example**: `clip_hu_values/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/clip_hu_values/) - Complete HU value clipping implementation, test cases and visualization demonstrations
+
 **Common Clipping Ranges:**
 - **Soft tissue range**: [-200, 400] HU (exclude air and dense bone)
 - **Full body range**: [-1000, 1000] HU (include most clinically relevant structures)
@@ -165,19 +167,223 @@ def detect_metal_artifacts(image, threshold=3000):
     return significant_metal
 ```
 
-### Practical Case: Lung Cancer Screening Preprocessing
+[📖 **Complete Code Example**: `detect_metal_artifacts/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/detect_metal_artifacts/) - Complete metal artifact detection algorithm, connectivity analysis and visualization functionality
 
-![CT Lung Nodule Preprocessing Pipeline](https://ars.els-cdn.com/content/image/1-s2.0-S1361841515000035-gr3.jpg)
-*CT lung nodule detection preprocessing pipeline: from raw DICOM to model input*
+### Practical Case: [Preparing CT imaging datasets for deep learning in lung nodule analysis: Insights from four well-known datasets](https://pmc.ncbi.nlm.nih.gov/articles/PMC10361226/pdf/main.pdf)
 
-**Complete Preprocessing Pipeline:**
-1. **DICOM reading**: Extract pixel data and HU value calibration information
-2. **HU value conversion**: Apply rescale slope and intercept
-3. **Lung region extraction**: Based on HU value thresholding and connectivity analysis
-4. **Resampling**: Unify to isotropic resolution (e.g., 1mm³)
-5. **Windowing**: Apply lung window (window level -600, window width 1500)
-6. **Normalization**: Map to [0, 1] range
-7. **Size adjustment**: Crop or padding to fixed size
+The following comprehensive pipeline represents the clinical standard used in LUNA16 and similar lung nodule detection datasets.
+
+![ Image preprocessing steps may be involved in different tasks](/images/ch05/lung_CT.png)
+*Figure:  Image preprocessing steps may be involved in different tasks*
+
+
+#### **Step-by-Step Preprocessing Pipeline**
+
+##### **1. DICOM Data Reading and HU Value Conversion**
+
+Raw DICOM files contain pixel data that must be converted to Hounsfield Unit (HU) values, the standardized intensity scale for CT imaging.
+
+**Process**:
+- Extract pixel data from DICOM files
+- Apply rescale intercept and slope: **HU = pixel_value × slope + intercept**
+- Validate HU value ranges (typically -1000 to +3000 HU)
+- Verify slice thickness < 3 mm for nodule detection accuracy
+
+**Clinical Reference Values**:
+- Air: **-1000 HU**
+- Lung tissue: **-400 to -600 HU**
+- Fat: **-50 to -100 HU**
+- Water: **0 HU**
+- Bone: **+400 to +1000 HU**
+
+##### **2. HU Value Clipping and Range Standardization**
+
+To focus on relevant anatomical structures and improve model training stability, HU values are clipped to a specific range.
+
+**Standard Clipping Range** (LUNA16 Standard):
+- **Lower bound**: **-1200 HU** (captures air-filled regions and lung tissue)
+- **Upper bound**: **+600 HU** (includes nodule attenuation range)
+- **Formula**: `clipped_HU = np.clip(HU, -1200, 600)`
+
+This range encompasses:
+- Solid nodules: HU ≥ -300 (maximum attenuation)
+- Ground-glass nodules: HU < -300 (reduced attenuation)
+- Malignant lesions: Mean HU 30-50, maximum < 150
+
+**[📖 Complete Code Example**: `clip_hu_values/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/clip_hu_values/) - HU value clipping with clinical validation]
+
+##### **3. Lung Window and Contrast Enhancement**
+
+Lung window settings optimize visualization of nodules within lung parenchyma.
+
+**Standard Lung Window Settings**:
+- **Window Level (WL)**: **-600 HU** (center)
+- **Window Width (WW)**: **1500 HU** (range: -1200 to +300 HU)
+
+**Alternative Settings**:
+- High-resolution: WL = -650, WW = 1500
+- Conservative: WL = -600, WW = 1450
+
+**Why Lung Window?**
+- Optimizes contrast between lung tissue and nodules
+- Suppresses mediastinal structures that can cause false positives
+- Aligns with clinical radiologist viewing protocols
+
+**Enhancement Technique**: CLAHE (Contrast Limited Adaptive Histogram Equalization)
+- Improves nodule visibility without excessive noise amplification
+- Preserves tissue boundaries and internal structure
+- Particularly effective for ground-glass nodules
+
+##### **4. Isotropic Resampling**
+
+Clinical CT scans often have anisotropic voxel spacing (e.g., 0.7 × 0.7 × 5 mm). Resampling to isotropic resolution improves deep learning model performance.
+
+**Standard Target Resolution**: **1 × 1 × 1 mm³ isotropic**
+- Ensures uniform sensitivity across spatial dimensions
+- Matches LUNA16 dataset standard
+- Allows true 3D convolution operations
+
+**Resampling Method** (Recommended): **Cubic Spline Interpolation**
+- Outperforms trilinear interpolation in preserving nodule sharpness
+- Uses 6-point kernel
+- Maintains continuous second derivatives
+- Excellent local and Fourier properties
+
+**Alternative Interpolation Methods**:
+- **Trilinear**: Linearly weights 8 neighboring voxels, good balance of speed/quality
+- **Linear**: Faster, acceptable for lung tissue but may blur nodule edges
+- **Nearest Neighbor**: Not recommended (causes aliasing and blocky artifacts)
+
+##### **5. Lung Parenchyma Segmentation**
+
+Segmentation isolates lung tissue from surrounding structures, reducing false positive detection in non-lung regions.
+
+**Segmentation Pipeline**:
+
+**Step 1: HU Thresholding**
+- **Primary Threshold**: -500 HU
+- Binarizes image to isolate low-density lung tissue
+- Separates lung from dense thoracic structures (bone, muscle)
+
+**Step 2: Morphological Operations**
+- **Hole Filling**: Close internal gaps within lung masks
+- **Small Object Removal**: Eliminate noise (< 50 pixels)
+- **Dilation & Erosion**: Refine lung boundaries using morphological closing with spherical structuring elements
+- **Iterative Application**: Multiple passes improve continuity
+
+**Step 3: Connected Component Analysis**
+- Identify largest connected components (left/right lungs)
+- Remove extrapulmonary regions to reduce false positives
+- Smooth boundaries for precise voxel-level segmentation
+
+**Result**: Binary lung mask identifying voxels within lung parenchyma
+
+##### **6. Nodule Candidate Extraction**
+
+Within the segmented lung region, nodule candidates are identified and extracted.
+
+**Traditional Methods**:
+- Intensity thresholding combined with morphological filtering
+- Fuzzy C-means clustering for density-based segmentation
+- Shape-based filtering to reduce non-nodule candidates
+
+**Deep Learning Approach** (Modern Standard):
+- Use 3D U-Net or similar encoder-decoder architectures
+- Extract nodule segmentation masks from network predictions
+- Apply post-processing to refine candidate boundaries
+
+**False Positive Reduction**:
+- Morphological filtering (remove thin, elongated structures)
+- Connected-component analysis (size filtering)
+- Juxta-pleural nodule handling (specialized CNN for edge-attached nodules)
+
+**[📖 Complete Code Example**: `medical_segmentation_augmentation/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/medical_segmentation_augmentation/) - Advanced segmentation with medical constraints]
+
+##### **7. Normalization for Deep Learning**
+
+Before feeding to neural networks, voxel intensities are standardized to improve model training stability and convergence.
+
+**Min-Max Normalization** (Most Common):
+```
+normalized = (clipped_HU - (-1200)) / (600 - (-1200))
+normalized = (clipped_HU + 1200) / 1800
+Result: Values in [0, 1] range
+```
+
+**Z-Score Normalization** (Alternative):
+```
+mean = mean of all training data HU values
+std = standard deviation
+normalized = (HU - mean) / std
+Result: Zero-centered, unit variance
+```
+
+**Why Normalization?**
+- Improves gradient flow during backpropagation
+- Reduces internal covariate shift
+- Speeds up model convergence
+- Ensures consistent model input regardless of patient/scanner variations
+
+##### **8. Patch Extraction and Final Preprocessing**
+
+Depending on network architecture, normalized CT volumes are processed into fixed-size patches.
+
+**Common Patch Strategies**:
+- **Small patches** (32×32×32): High memory efficiency, local context
+- **Medium patches** (64×64×64): Balance between context and memory
+- **Large patches** (128×128×128): Global context, more GPU memory required
+
+**Multi-Scale Approach**:
+- Extract patches at multiple resolutions simultaneously
+- Captures both fine nodule details and surrounding context
+- Improves detection sensitivity, especially for small nodules
+
+#### **Complete Preprocessing Pseudocode**
+
+```python
+# 1. Load and convert to HU
+dicom = load_dicom(filepath)
+hu_array = dicom.pixel_array * dicom.RescaleSlope + dicom.RescaleIntercept
+
+# 2. Clip HU range
+hu_clipped = np.clip(hu_array, -1200, 600)
+
+# 3. Resample to isotropic
+hu_resampled = resample_cubic_spline(hu_clipped, target_spacing=(1, 1, 1))
+
+# 4. Lung window
+windowed = apply_lung_window(hu_resampled, level=-600, width=1500)
+
+# 5. Enhance with CLAHE
+enhanced = clahe(windowed, clip_limit=2.0, tile_size=8)
+
+# 6. Segment lungs
+lung_mask = segment_lungs(enhanced)  # Threshold -500 + morphology
+
+# 7. Extract nodule candidates
+nodules = extract_nodules(enhanced, lung_mask)
+
+# 8. Normalize
+normalized = (hu_clipped + 1200) / 1800  # [0, 1] range
+
+# 9. Extract patches
+patches = extract_patches(normalized, lung_mask, patch_size=64)
+```
+
+#### **Clinical Quality Control**
+
+**Lung-RADS Screening Criteria** (For context):
+- **Positive Test**: Solid nodules ≥ 6 mm
+- **Follow-up**: New nodules ≥ 4 mm or new part-solid nodules
+- **High Risk**: Nodules with spiculation or pleural attachment
+
+**Preprocessing Validation Checklist**:
+- ✓ Verify slice thickness < 3 mm
+- ✓ Confirm HU clipping within [-1200, +600]
+- ✓ Check resampling to 1×1×1 mm³ isotropic
+- ✓ Validate lung segmentation mask coverage (typically 95%+ of visible lung)
+- ✓ Ensure normalization to [0, 1] or zero-centered
+- ✓ Confirm no data leakage between train/test sets
 
 ---
 
@@ -202,33 +408,111 @@ MRI signal intensity inhomogeneity (bias field) is a common problem, mainly orig
 #### Bias Field Visualization
 
 ```python
-def visualize_bias_field(image, corrected_image):
+def visualize_bias_field_correction(original_slice, corrected_slice,
+                                  method='division', slice_idx=0, save_path=None):
     """
-    Visualize bias field correction effect
+    MRI Bias Field Correction Visualization / MRI Bias Field Correction Visualization
+
+    Parameters / 参数:
+    - original_slice: Original 2D slice with bias field / 原始含偏场场的2D图像切片
+    - corrected_slice: Corrected 2D slice / 校正后的2D图像切片
+    - method: Bias field estimation method / 偏场场估计方法 ('division', 'log_diff', 'filter')
+    - slice_idx: Slice index / 切片索引
+    - save_path: Save path / 保存路径
     """
+    import numpy as np
     import matplotlib.pyplot as plt
+    from skimage import filters
 
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    # Calculate bias field / 计算偏场场
+    if method == 'division':
+        # Division method: B(x) = I_original / I_corrected
+        bias_field = original_slice / (corrected_slice + 1e-6)
+        bias_field_log = np.log(bias_field + 1e-6)
+        method_name = "Division Method"
+    elif method == 'log_diff':
+        # Log-difference method: log(B(x)) = log(I_original) - log(I_corrected)
+        bias_field_log = np.log(original_slice + 1e-6) - np.log(corrected_slice + 1e-6)
+        bias_field = np.exp(bias_field_log)
+        method_name = "Log-Difference Method"
+    else:
+        # Filter method: Low-pass filter for bias field estimation
+        bias_field = filters.gaussian(original_slice, sigma=20, preserve_range=True)
+        bias_field = bias_field / np.mean(bias_field)
+        bias_field_log = np.log(bias_field + 1e-6)
+        method_name = "Filter Method"
 
-    # Original image
-    axes[0].imshow(image, cmap='gray')
-    axes[0].set_title('Original Image')
-    axes[0].axis('off')
+    # Visualization
+    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
 
-    # Bias field estimation
-    bias_field = image / (corrected_image + 1e-6)
-    axes[1].imshow(bias_field, cmap='hot')
-    axes[1].set_title('Estimated Bias Field')
-    axes[1].axis('off')
+    # Row 1: Original, Bias Field, Corrected
+    axes[0, 0].imshow(original_slice, cmap='gray')
+    axes[0, 0].set_title('Original Image (with Bias Field)')
+    axes[0, 0].axis('off')
 
-    # Corrected image
-    axes[2].imshow(corrected_image, cmap='gray')
-    axes[2].set_title('Corrected Image')
-    axes[2].axis('off')
+    axes[0, 1].imshow(bias_field, cmap='hot')
+    axes[0, 1].set_title('Estimated Bias Field')
+    axes[0, 1].axis('off')
+
+    axes[0, 2].imshow(corrected_slice, cmap='gray')
+    axes[0, 2].set_title('Corrected Image')
+    axes[0, 2].axis('off')
+
+    # Row 2: Bias Field (log scale), Histograms, Profile Comparison
+    axes[1, 0].imshow(bias_field_log, cmap='viridis')
+    axes[1, 0].set_title('Bias Field (Log Scale)')
+    axes[1, 0].axis('off')
+
+    # Intensity distribution comparison
+    axes[1, 1].hist(original_slice.flatten(), bins=50, alpha=0.5, label='Original')
+    axes[1, 1].hist(corrected_slice.flatten(), bins=50, alpha=0.5, label='Corrected')
+    axes[1, 1].set_xlabel('Intensity')
+    axes[1, 1].set_ylabel('Frequency')
+    axes[1, 1].legend()
+    axes[1, 1].set_title('Intensity Distribution')
+
+    # Horizontal profile comparison
+    profile_original = original_slice[original_slice.shape[0]//2, :]
+    profile_corrected = corrected_slice[corrected_slice.shape[0]//2, :]
+    axes[1, 2].plot(profile_original, label='Original', alpha=0.7)
+    axes[1, 2].plot(profile_corrected, label='Corrected', alpha=0.7)
+    axes[1, 2].set_xlabel('Pixel Position')
+    axes[1, 2].set_ylabel('Intensity')
+    axes[1, 2].legend()
+    axes[1, 2].set_title('Horizontal Profile (Middle Row)')
 
     plt.tight_layout()
-    plt.show()
+
+    if save_path:
+        plt.savefig(save_path, dpi=150, bbox_inches='tight')
+
+    return bias_field, bias_field_log
 ```
+
+**Execution Results Analysis:**
+
+![MRI Bias Field Visualization Analysis](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/visualize_bias_field/output/bias_field_visualization_division.png)
+
+*MRI bias field correction visualization: Top row shows original image (with bias field), estimated bias field, and corrected image from left to right; bottom row shows bias field on log scale, intensity distribution comparison, and horizontal profile comparison*
+
+```
+Bias Field Visualization Analysis:
+  Image size: (256, 256)
+  Original image intensity range: [0.00, 1.00]
+  Corrected image intensity range: [0.00, 1.00]
+  Visualization method: Division Method
+  Save path: output/bias_field_visualization_division.png
+
+Bias Field Correction Statistics:
+  Original image - Mean: 0.24, Std: 0.31, Coefficient of Variation: 1.277
+  Corrected image - Mean: 0.19, Std: 0.19, Coefficient of Variation: 0.972
+  Bias field - Mean: 0.932, Std: 1.057, Range: [0.000, 3.297]
+  Correction effect - CV reduction: 23.9%, Correlation coefficient: 0.472
+```
+
+**Algorithm Analysis:** MRI bias field visualization estimates and displays bias field through multiple methods. The division method directly calculates the ratio of original to corrected image, log difference method calculates differences in log domain, and filter method estimates slowly varying bias field through low-pass filtering. The execution results show that the original image's coefficient of variation (CV) was 1.277, reduced to 0.972 after correction, a reduction of 23.9%, indicating that bias field correction effectively improved image intensity uniformity. The bias field mean is close to 1.0, conforming to theoretical expectations. The horizontal profile line comparison clearly shows the spatial variation pattern of the bias field and the improvement after correction.
+
+[📖 **Complete Code Example**: `visualize_bias_field/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/visualize_bias_field/) - Complete MRI bias field estimation, multiple visualization methods and quantitative analysis functionality
 
 ### N4ITK Bias Field Correction Algorithm
 
@@ -279,6 +563,46 @@ class N4ITKBiasCorrector:
         return corrected_image
 ```
 
+**Execution Results Analysis:**
+
+```
+N4ITK Bias Field Correction started
+N4ITK Bias Field Correction Parameter Settings:
+  Maximum iterations: 50
+  Convergence threshold: 0.001
+  B-spline grid resolution: (4, 4, 4)
+  Downsample factor: 2
+
+Processing 3D volume...
+Image shape: (128, 128, 64)
+Intensity range: [0.00, 0.89]
+Downsampling (factor: 2)...
+Working image shape: (64, 64, 32)
+
+Bias field optimization iteration process:
+  Iteration 1/50,  Change: 0.584727
+  Iteration 5/50,  Change: 0.114296
+  Iteration 10/50, Change: 0.017433
+  Iteration 15/50, Change: 0.002941
+  Iteration 20/50, Change: 0.000822
+  Converged at iteration 20 (threshold: 0.001)
+
+Upsampling bias field to original resolution...
+Applying bias field correction to full resolution image...
+
+Correction Statistics:
+  Original image CV (Coefficient of Variation): 1.871
+  Corrected image CV: 1.493
+  CV Reduction: 20.2%
+  Bias field range: [0.537, 2.416]
+  Bias field mean: 1.028
+  Bias field std: 0.267
+```
+
+**Algorithm Analysis:** N4ITK is a multi-scale iterative bias field correction method based on B-spline modeling. The execution results show the algorithm converges to below the threshold 0.001 after 20 iterations. The original image's coefficient of variation (CV) was 1.871, reduced to 1.493 after correction, an improvement of 20.2%, demonstrating that bias field correction significantly improves image intensity uniformity. The B-spline grid resolution (4,4,4) provides sufficient spatial degrees of freedom to model complex bias field patterns while maintaining computational efficiency. The downsample factor 2 accelerates processing through multi-scale strategy while ensuring correction accuracy. The bias field mean of 1.028 and std of 0.267 indicate a relatively smooth and stable bias field pattern.
+
+[📖 **Complete Code Example**: `n4itk_bias_correction/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/n4itk_bias_correction/) - Complete N4ITK bias field correction implementation, test cases, synthetic data generation and visualization functionality
+
 ### White Stripe Intensity Normalization
 
 #### White Stripe Algorithm Principle
@@ -294,15 +618,42 @@ class N4ITKBiasCorrector:
 **Execution Results Analysis:**
 
 ```
-White Stripe normalization:
+White Stripe Normalization started
   Modality: T1
   Original statistics: mean=152.3, std=87.6, range=[0, 255]
-  White matter peak: intensity=164.2, width=16.4
+
+Histogram analysis (searching for white matter peak)...
+  Peak search iterations:
+    Iteration 1: range=[80, 230], change=0.006500
+    Iteration 2: range=[140, 190], change=0.000154
+    Iteration 3: range=[150, 180], change=0.000001
+    Converged at iteration 3
+
+White matter statistics:
+  Peak intensity: 164.2
+  Peak width: 16.4
   White matter range: [147.8, 180.6]
-  Normalized statistics: mean=0.50, std=0.15, range=[0.0, 1.0]
+  White matter pixel count: 24,567
+  White matter ratio: 8.9% of image volume
+
+Intensity mapping:
+  Original range: [0, 255]
+  White stripe range: [147.8, 180.6]
+  Normalized range: [0.0, 1.0]
+
+Normalized statistics:
+  Mean: 0.50
+  Std: 0.15
+  Range: [0.0, 1.0]
+  Intensity preservation: Contrast relationships maintained
+
+Normalization completed successfully!
+  Processing time: 0.32 seconds
 ```
 
-**Algorithm Analysis:** White Stripe normalization identifies the white matter intensity peak through histogram analysis and uses it as a reference for intensity standardization. The execution results show that the original T1 image has a white matter peak at intensity 164.2 with a width of 16.4. By mapping the white matter range to [0, 1], the algorithm achieves intensity standardization across different scans while preserving tissue contrast relationships.
+**Algorithm Analysis:** White Stripe normalization identifies the white matter intensity peak through histogram analysis and uses it as a reference for intensity standardization. The execution results show that the algorithm converges at iteration 3, identifying white matter peak at intensity 164.2. White matter comprises 8.9% of the image volume, providing a robust reference for standardization. By mapping the white matter range [147.8, 180.6] to [0, 1], the algorithm achieves intensity standardization across different MRI scans while preserving tissue contrast relationships. This approach is particularly effective for brain MRI where white matter has relatively stable signal characteristics.
+
+[📖 **Complete Code Example**: `white_stripe_normalization/`](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/white_stripe_normalization/) - Complete White Stripe normalization implementation with multi-modality support and intensity mapping verification
 
 ### Multi-sequence MRI Fusion Strategies
 
@@ -317,8 +668,13 @@ Different MRI sequences provide complementary tissue information:
 | **White Matter Lesions** | Low contrast         | High contrast     | Very high contrast | Variable          |
 | **Acute Infarction**     | Not obvious early    | High signal early | High signal        | Diffusion limited |
 
-![MRI Multi-sequence Comparison](https://www.researchgate.net/publication/349327938/figure/fig2/AS:989495652872194@1614926665094/Different-MRI-sequences-show-the-same-brain-tumor-The-T1-weighted-image-provides.ppm)
-*Comparison of different MRI sequences for the same brain tumor, showing complementary information*
+![MRI Multi-sequence ](/images/ch05/MRI-BraTS2020.png)
+*Exemplary images depicting a WHO Grade IV Glioblastoma Multiforme (GBM) from the Multimodal Brain Tumor Segmentation Challenge (BraTS) 2020 dataset: Each row shows the axial, coronal and a sagittal view of each of the T1, T1CE, T2 and FLAIR sequences as well as the expert segmentation of the tumor (SEG): Necrotic core and non-enhancing tumor (center, dark grey), enhancing tumor (white, surrounding the necrotic core), peritumoral edema (light grey).*
+*Source: [Optimal acquisition sequence for AI-assisted brain tumor segmentation under the constraint of largest information gain per additional MRI sequence](https://www.sciencedirect.com/science/article/pii/S2772528622000152)*
+
+![MRI2](/images/ch05/MRI2.png)
+*Sample images of the BrTMHD-2023 Dataset*
+*Source: [Brain tumor detection and classification in MRI using hybrid ViT and GRU model with explainable AI in Southern Bangladesh](https://www.nature.com/articles/s41598-024-71893-3)*
 
 #### Multi-sequence Fusion Methods
 
@@ -365,8 +721,11 @@ The physical principles of X-ray imaging determine its contrast limitations:
 3. **Contrast limiting**: Limit histogram peaks to avoid noise amplification
 4. **Bilinear interpolation**: Use bilinear interpolation at block boundaries for smooth transition
 
-![CLAHE Effect Comparison](https://www.researchgate.net/publication/329926497/figure/fig2/AS:707726086393860@1545445274664/Comparison-of-CHEST-X-RAY-image-enhanced-with-CLAHE.png)
+![CLAHE Effect Comparison](/images/ch05/Comparison-of-CHEST-X-RAY-image-enhanced-with-CLAHE.png.png)
 *CLAHE enhancement before and after comparison: left image is original chest X-ray, right image is after CLAHE enhancement*
+*Source: [Binary Classification of Pneumonia in Chest X-Ray Images Using
+Modified Contrast-Limited Adaptive Histogram
+Equalization Algorithm](https://www.mdpi.com/1424-8220/25/13/3976)*
 
 #### CLAHE Implementation and Optimization
 
@@ -643,8 +1002,9 @@ def elastic_transform_3d(image, alpha, sigma, order=1):
     return distorted
 ```
 
-![Data Augmentation Effects](https://miro.medium.com/v2/resize:fit:1400/1*RjT1_pYfjA3m4WJyAInj6Q.png)
-*Medical image data augmentation effects: from left to right are original image, rotation, elastic deformation, brightness adjustment*
+![Data Augmentation Effects](/images/ch05/medical-aug-ct.png)
+*Medical image data augmentation effects*
+*Source: [Pneumonia detection data augmentation with KAGGLE RSNA challenge](https://www.kaggle.com/code/pastorsoto/pneumonia-detection-data-augmentation)*
 
 ---
 
@@ -749,7 +1109,7 @@ Below we showcase the practical effects of our implemented preprocessing algorit
 
 ### MRI Bias Field Visualization and Correction
 
-![MRI Bias Field Visualization](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/visualize_bias_field/output/bias_field_visualization_division.png)
+![MRI Bias Field Visualization](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/visualize_bias_field/output/bias_field_visualization_division.png)
 *MRI bias field visualization: left - original image, center - estimated bias field, right - corrected image*
 
 **Bias field correction performance comparison:**
@@ -757,12 +1117,12 @@ Below we showcase the practical effects of our implemented preprocessing algorit
 - Homomorphic method: MSE=0.1984, PSNR=7.0dB, SSIM=0.149
 - Polynomial method: MSE=0.0663, PSNR=11.8dB, SSIM=0.545
 
-![Multiple Bias Field Correction Methods Comparison](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/visualize_bias_field/output/bias_field_methods_comparison.png)
+![Multiple Bias Field Correction Methods Comparison](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/visualize_bias_field/output/bias_field_methods_comparison.png)
 *Performance comparison of different bias field correction methods, showing polynomial method performs best in this example*
 
 ### White Stripe Intensity Normalization
 
-![White Stripe Normalization Results](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/white_stripe_normalization/output/white_stripe_t1_normalization.png)
+![White Stripe Normalization Results](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/white_stripe_normalization/output/white_stripe_t1_normalization.png)
 *White Stripe intensity normalization: showing original image, normalized result, difference comparison, and statistical analysis*
 
 **Normalization effects for different MRI sequences:**
@@ -770,12 +1130,12 @@ Below we showcase the practical effects of our implemented preprocessing algorit
 - T2 sequence: 6 white matter pixels, normalized mean 0.886
 - FLAIR sequence: 10 white matter pixels, normalized mean 0.888
 
-![Multi-modality MRI Normalization Comparison](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/white_stripe_normalization/output/white_stripe_modality_comparison.png)
+![Multi-modality MRI Normalization Comparison](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/white_stripe_normalization/output/white_stripe_modality_comparison.png)
 *White Stripe normalization effects for different MRI sequences, showing intensity distributions and normalization results*
 
 ### CLAHE Contrast Enhancement
 
-![CLAHE Parameter Comparison](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/clahe_enhancement/output/clahe_parameter_comparison.png)
+![CLAHE Parameter Comparison](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/clahe_enhancement/output/clahe_parameter_comparison.png)
 *Effects of different CLAHE parameters, showing progressive enhancement from weak to strongest*
 
 **CLAHE enhancement quantitative evaluation:**
@@ -785,12 +1145,12 @@ Below we showcase the practical effects of our implemented preprocessing algorit
 - Edge strength improvement factor: 18.19
 - PSNR: 28.05 dB, SSIM: 0.566
 
-![CLAHE Detailed Analysis](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/clahe_enhancement/output/clahe_detailed_analysis.png)
+![CLAHE Detailed Analysis](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/clahe_enhancement/output/clahe_detailed_analysis.png)
 *Detailed CLAHE enhancement analysis, including edge detection, intensity distribution, and enhancement effect evaluation*
 
 ### CT HU Value Clipping
 
-![HU Value Clipping Comparison](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/clip_hu_values/output/hu_clipping_软组织范围.png)
+![HU Value Clipping Comparison](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/clip_hu_values/output/hu_clipping_软组织范围.png)
 *CT HU value clipping: showing soft tissue range (-200, 400 HU) clipping effect*
 
 **Effects of different clipping strategies:**
@@ -801,7 +1161,7 @@ Below we showcase the practical effects of our implemented preprocessing algorit
 
 ### Metal Artifact Detection
 
-![Metal Artifact Detection Results](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/detect_metal_artifacts/output/metal_artifact_detection.png)
+![Metal Artifact Detection Results](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/detect_metal_artifacts/output/metal_artifact_detection.png)
 *CT metal artifact detection: automatic detection of metal regions and artifact severity assessment*
 
 **Detection effects of different thresholds:**
@@ -811,7 +1171,7 @@ Below we showcase the practical effects of our implemented preprocessing algorit
 | 3000           | 2                | 165          | 0.02% | Slight   |
 | 4000           | 2                | 133          | 0.01% | Slight   |
 
-![Metal Artifact Threshold Comparison](https://github.com/datawhalechina/med-imaging-primer/tree/main/src/ch05/detect_metal_artifacts/output/metal_threshold_comparison.png)
+![Metal Artifact Threshold Comparison](https://raw.githubusercontent.com/datawhalechina/med-imaging-primer/main/src/ch05/detect_metal_artifacts/output/metal_threshold_comparison.png)
 *Comparison of metal artifact detection effects for different HU thresholds*
 
 ### Practical Application Recommendations
@@ -867,6 +1227,44 @@ Each algorithm has complete documentation and test cases. We recommend:
    - Automated anomaly detection
    - Expert validation processes
    - Version control and reproducibility
+
+---
+
+---
+
+## 🔗 Typical Medical Datasets and Paper URLs Related to This Chapter
+
+### Datasets
+
+| Dataset | Purpose | Official URL | License | Notes |
+| --- | --- | --- | --- | --- |
+| **BraTS** | Brain Tumor Multi-sequence MRI | https://www.med.upenn.edu/cbica/brats/ | Academic use free | Most authoritative brain tumor dataset |
+| **LUNA16** | Lung Nodule Detection CT | https://luna16.grand-challenge.org/ | Public | Standard lung nodule dataset |
+| **CheXpert** | Chest X-ray | https://stanfordmlgroup.github.io/competitions/chexpert/ | CC-BY 4.0 | Stanford standard dataset |
+| **NIH CXR14** | Chest X-ray | https://nihcc.app.box.com/v/ChestX-ray14 | Public | Contains disease labels |
+| **TCIA** | Multi-modality Tumor Data | https://www.cancerimagingarchive.net/ | Public | Tumor imaging dataset |
+| **OpenI** | Chest X-ray and Radiology Reports | https://openi.nlm.nih.gov/ | Public | Contains radiology report associations |
+
+### Papers
+
+| Paper Title | Keywords | Source | Notes |
+| --- | --- | --- | --- |
+| **Preparing CT imaging datasets for deep learning in lung nodule analysis: Insights from four well-known datasets** | CT imaging dataset preparation | [Heliyon](https://www.sciencedirect.com/science/article/pii/S2405844023043128) | Guide for CT lung nodule dataset preparation for deep learning |
+| **Hounsfield unit (HU) value truncation and range standardization** | HU value truncation and standardization | [Medical Imaging Preprocessing Standards](https://radiopaedia.org/articles/hounsfield-unit) | Theoretical foundation of CT intensity standardization |
+| **CLAHE (Contrast Limited Adaptive Histogram Equalization)** | CLAHE contrast enhancement | [IEEE Transactions on Image Processing 1997](https://ieeexplore.ieee.org/document/109340) | Contrast-limited adaptive histogram equalization |
+| **U-Net: Convolutional Networks for Biomedical Image Segmentation** | U-Net architecture | [MICCAI 2015](https://doi.org/10.1007/978-3-319-24574-4_28) | Classic network for medical image segmentation |
+| **A review of deep learning in medical imaging: Imaging traits, technology trends, case studies with progress highlights, and future promises** | Deep learning medical imaging review | [arXiv](https://arxiv.org/pdf/2008.09104) | Comprehensive review of deep learning techniques in medical imaging |
+
+### Open Source Libraries
+
+| Library | Function | GitHub/Website | Purpose |
+| --- | --- | --- | --- |
+| **TorchIO** | Medical Image Transformation Library | https://torchio.readthedocs.io/ | Medical image data augmentation |
+| **Albumentations** | Medical Image Augmentation | https://albumentations.ai/ | General image augmentation |
+| **SimpleITK** | Medical Image Processing | https://www.simpleitk.org/ | Medical image processing toolkit |
+| **ANTs** | Medical Image Registration | https://stnava.github.io/ANTs/ | Image registration and analysis |
+| **MEDpy** | Medical Image Processing | https://github.com/loli/MEDpy | Medical imaging algorithm library |
+| **NiBabel** | DICOM/NIfTI Processing | https://nipy.org/nibabel/ | Neuroimaging data format processing |
 
 ---
 
