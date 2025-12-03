@@ -1501,6 +1501,8 @@ flowchart TD
 
 ## 🔗 Typical Medical Datasets and Paper URLs Related to This Chapter
 
+:::details
+
 ### Datasets
 
 | Dataset | Purpose | Official URL | License | Notes |
@@ -1529,6 +1531,8 @@ flowchart TD
 | **TorchIO** | Medical Image Transformation Library | https://torchio.readthedocs.io/ | Supports multiple medical image formats and enhancement transformations |
 | **deepmedic** | 3D Medical Image Classification | https://github.com/DeepMedic/deepmedic | High-performance 3D medical image classification framework, especially suitable for brain images |
 | **Grad-CAM++** | Explainable Visualization | https://github.com/jacobgil/grad-cam-plus-plus | Attention visualization tool for medical image classification |
+
+:::
 
 ---
 

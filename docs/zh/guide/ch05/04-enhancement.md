@@ -723,6 +723,8 @@ def super_resolution_case_study(lr_images, hr_images, model):
 
 ## 🔗 本章节相关的典型医学数据集和论文网址与开源库
 
+:::details
+
 ### 数据集
 
 | 数据集              | 用途              | 官方网址                                                 | 许可证       | 备注                 |
@@ -763,6 +765,8 @@ def super_resolution_case_study(lr_images, hr_images, model):
 | **Augmenters** | 图像增强库 | https://github.com/mdbloice/Augmenters | 医学图像增强的Python库 |
 | **Denoising-Diffusion-Model-Pytorch** | 扩散模型去噪 | https://github.com/lucidrains/denoising-diffusion-model-pytorch | 基于扩散模型的医学图像去噪 |
 | **SimpleITK** | 医学图像处理 | https://simpleitk.org/ | 跨平台的医学图像处理库 |
+
+:::
 
 ---
 

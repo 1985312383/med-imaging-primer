@@ -1518,6 +1518,8 @@ def super_resolution_case_study(lr_images, hr_images, model):
 
 ## 🔗 Typical Medical Datasets and Paper URLs Related to This Chapter
 
+:::details
+
 ### Datasets
 
 | Dataset | Purpose | Official URL | License | Notes |
@@ -1554,6 +1556,8 @@ def super_resolution_case_study(lr_images, hr_images, model):
 | **medpy** | Medical Image Processing | https://github.com/loli/medpy | Medical imaging algorithm library |
 | **Catalyst** | Deep Learning Framework | https://github.com/catalyst-team/catalyst | Framework for deep learning research |
 | **albumentations** | Fast Image Augmentation | https://github.com/albu/albumentations | Image augmentation library |
+
+:::
 
 ---
 

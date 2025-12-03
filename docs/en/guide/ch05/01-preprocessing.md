@@ -1234,6 +1234,8 @@ Each algorithm has complete documentation and test cases. We recommend:
 
 ## 🔗 Typical Medical Datasets and Paper URLs Related to This Chapter
 
+:::details
+
 ### Datasets
 
 | Dataset | Purpose | Official URL | License | Notes |
@@ -1266,6 +1268,7 @@ Each algorithm has complete documentation and test cases. We recommend:
 | **MEDpy** | Medical Image Processing | https://github.com/loli/MEDpy | Medical imaging algorithm library |
 | **NiBabel** | DICOM/NIfTI Processing | https://nipy.org/nibabel/ | Neuroimaging data format processing |
 
+:::
 ---
 
 ::: info 💡 Next Steps
