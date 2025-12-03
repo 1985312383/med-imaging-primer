@@ -1516,6 +1516,47 @@ def super_resolution_case_study(lr_images, hr_images, model):
 
 ---
 
+## 🔗 Typical Medical Datasets and Paper URLs Related to This Chapter
+
+### Datasets
+
+| Dataset | Purpose | Official URL | License | Notes |
+| --- | --- | --- | --- | --- |
+| **BraTS** | Brain Tumor Multi-sequence MRI Enhancement | https://www.med.upenn.edu/cbica/brats/ | Academic use free | Most authoritative brain tumor dataset |
+| **LUNA16** | Lung Nodule Detection CT Enhancement Validation | https://luna16.grand-challenge.org/ | Public | Standard lung nodule dataset |
+| **FastMRI** | MRI Fast Reconstruction Dataset | https://fastmri.med.nyu.edu/ | Apache 2.0 | Accelerated MRI reconstruction benchmark dataset |
+| **Medical Segmentation Decathlon** | Multi-modality Medical Image Enhancement | https://medicaldecathlon.com/ | CC BY-SA 4.0 | 10 organs' CT/MRI datasets |
+| **IXI** | Brain MRI Multi-center Data | https://brain-development.org/ixi-dataset/ | CC BY-SA 3.0 | 600 multi-center brain MRI data |
+| **OpenNeuro** | Open Neuroimaging Data | https://openneuro.org/ | CC0 | Contains fMRI, DTI and other neuroimaging data |
+| **TCIA** | Cancer Imaging Archive | https://www.cancerimagingarchive.net/ | Public | Contains imaging data for various cancer types |
+| **QIN** | Quality Assurance Network Data | https://imagingcommons.cancer.gov/qin/ | Public | Contains various cancer imaging and phenotype data |
+| **MIDRC** | COVID-19 Imaging Data | https://midrc.org/ | Public | COVID-19 chest X-ray and CT dataset |
+
+### Papers
+
+| Paper Title | Keywords | Source | Notes |
+| --- | --- | --- | --- |
+| **Generative Adversarial Networks in Medical Image Augmentation: A review** | Medical GAN augmentation review | [ScienceDirect Computers in Biology and Medicine](https://www.sciencedirect.com/science/article/pii/S0010482522001743) | Comprehensive review of GAN applications in medical image augmentation |
+| **A Review of Deep Learning in Medical Imaging: Imaging Traits, Technology Trends, Case Studies With Progress Highlights, and Future Promises** | Deep learning medical enhancement review | [IEEE Explore](https://ieeexplore.ieee.org/document/9363915) | Deep learning review in medical image enhancement |
+| **Application of Super-Resolution Convolutional Neural Network for Enhancing Image Resolution in Chest CT** | Super-resolution enhancement | [Springer Journal of Digital Imaging](https://link.springer.com/article/10.1007/s10278-017-0033-z) | Application of SRCNN in medical image super-resolution |
+| **Generative adversarial network in medical imaging: A review** | Medical GAN synthesis review | [Medical Image Analysis](https://www.sciencedirect.com/science/article/pii/S1361841518308430) | Latest progress of GAN in medical image synthesis |
+| **Learning deconvolutional deep neural network for high resolution medical image reconstruction** | Deconvolution network super-resolution | [Information Sciences](https://www.sciencedirect.com/science/article/pii/S0020025518306273) | Application of deconvolutional network in medical image super-resolution |
+
+### Open Source Libraries
+
+| Library | Function | GitHub/Website | Purpose |
+| --- | --- | --- | --- |
+| **TorchIO** | Medical Image Transformation Library | https://torchio.readthedocs.io/ | Medical image data augmentation |
+| **Albumentations** | Medical Image Augmentation | https://albumentations.ai/ | General image augmentation |
+| **SimpleITK** | Medical Image Processing | https://www.simpleitk.org/ | Image processing toolkit |
+| **MONAI** | Deep Learning Medical AI | https://monai.io/ | Medical imaging deep learning |
+| **ANTsPy** | Image Registration and Analysis | https://github.com/ANTsX/ANTsPy | Advanced image analysis |
+| **medpy** | Medical Image Processing | https://github.com/loli/medpy | Medical imaging algorithm library |
+| **Catalyst** | Deep Learning Framework | https://github.com/catalyst-team/catalyst | Framework for deep learning research |
+| **albumentations** | Fast Image Augmentation | https://github.com/albu/albumentations | Image augmentation library |
+
+---
+
 ::: info 🎯 Chapter Completion
 Through this chapter, you have mastered the core technologies of medical image augmentation and recovery. From traditional geometric transformations to advanced generative adversarial networks, from simple filtering denoising to complex deep learning super-resolution, these techniques will help you solve medical imaging data scarcity and quality issues, providing better data foundations for subsequent deep learning models.
 :::

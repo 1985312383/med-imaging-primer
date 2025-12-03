@@ -1045,6 +1045,46 @@ class LungNoduleSegmentationNet(nn.Module):
 
 ---
 
+## 🔗 本章节相关的典型医学数据集和论文网址与开源库
+
+### 数据集
+
+| 数据集              | 用途                  | 官方网址                                                 | 许可证       | 备注                 |
+| ------------------- | --------------------- | -------------------------------------------------------- | ------------ | -------------------- |
+| **BraTS**     | 脑肿瘤 MRI 多序列分割 | https://www.med.upenn.edu/cbica/brats/                   | 学术用途免费 | 最权威的脑肿瘤数据集 |
+| **LUNA16**    | 肺结节检测与分割      | https://luna16.grand-challenge.org/                      | 公开         | 肺结节标准数据集     |
+| **MSD**       | 多器官分割           | https://medicaldecathlon.grand-challenge.org/              | 公开         | 多器官分割挑战赛    |
+| **ATLAS**     | 心脏CT/MRI分割       | http://medicaldecathlon.grand-challenge.org/              | 学术用途免费 | 心脏分割数据集      |
+| **KiTS21**    | 肾脏肿瘤分割         | https://kits21.kits-challenge.org/                      | 公开         | 肾脏肿瘤分割        |
+| **ISBI**      | 细胞分割            | http://brainiac2.mit.edu/isbi/                           | 公开         | 电子显微镜细胞分割  |
+
+### 论文
+
+| 论文标题 | 关键字段 | 来源 | 备注 |
+| -------- | -------- | ---- | ---- |
+| **U-Net: Convolutional Networks for Biomedical Image Segmentation** | U-Net分割网络 | [arXiv:1505.04597](https://arxiv.org/abs/1505.04597) | U-Net原始论文，开创了医学图像分割的编码器-解码器架构 |
+| **U-Net++: A Nested U-Net Architecture for Medical Image Segmentation** | 深度监督分割 | [arXiv:1807.10165](https://arxiv.org/abs/1807.10165) | U-Net++改进，通过深度监督和递归连接提升分割精度 |
+| **nnU-Net: A Framework for Automatic, Deep Learning-Based Biomedical Image Segmentation** | 自动分割框架 | [ Nat Methods 18, 203–211 (2021)](https://www.nature.com/articles/s41592-020-01008-z) | nnU-Net自动化框架，在多个医学分割任务中表现优异 |
+| **V-Net: Fully Convolutional Neural Networks for Volumetric Medical Image Segmentation** | 3D医学分割 | [2016 Fourth International Conference on 3D Vision](https://arxiv.org/pdf/1606.04797) | V-Net，专为3D医学图像分割设计的全卷积网络 |
+| **Attention U-Net: Learning Where to Look for the Pancreas** | 注意力机制分割 | [arxiv](https://arxiv.org/pdf/1804.03999) | 在医学分割中引入注意力机制，提高目标区域识别能力 |
+| **Deep Learning for Brain Tumor Segmentation: A Survey** | 脑肿瘤分割综述 | [Springer Journal: Complex & Intelligent Systems](https://link.springer.com/article/10.1007/s40747-022-00815-5) | 脑肿瘤分割深度学习的全面综述和方法比较 |
+| **3D U-Net: Learning Dense Volumetric Segmentation from Sparse Annotation** | 3D稀疏分割 | [arXiv:1606.06650](https://arxiv.org/abs/1606.06650) | 3D U-Net扩展，适用于稀疏标注的3D医学图像分割 |
+
+
+### 开源库
+
+| **库名称** | **功能** | **GitHub/官网** | **用途** |
+| --- | --- | --- | --- |
+| **TorchIO**        | 医学图像变换库 | https://torchio.readthedocs.io/ | 医学图像数据增强 |
+| **nnU-Net**        | 自动分割框架   | https://github.com/MIC-DKFZ/nnunet | 医学图像分割框架 |
+| **MONAI**          | 深度学习医疗AI  | https://monai.io/               | 医学影像深度学习 |
+| **SimpleITK**      | 医学图像处理   | https://simpleitk.org/          | 图像处理工具     |
+| **ANTsPy**         | 图像配准与分析 | https://github.com/ANTsX/ANTsPy | 高级图像分析     |
+| **medpy**          | 医学影像处理   | https://github.com/loli/medpy   | 医学影像算法库   |
+| **DeepLabv3+**     | 语义分割       | https://github.com/tensorflow/models | DeepLabv3+ 实现  |
+
+---
+
 ::: info 🚀 下一步
 现在你已经掌握了U-Net及其变体的核心原理和应用技巧。在下一节（5.3 分类和检测）中，我们将学习医学图像中的分类和检测任务，了解如何从分割结果进一步诊断疾病和定位病灶。
 :::

@@ -721,6 +721,51 @@ def super_resolution_case_study(lr_images, hr_images, model):
 
 ---
 
+## 🔗 本章节相关的典型医学数据集和论文网址与开源库
+
+### 数据集
+
+| 数据集              | 用途              | 官方网址                                                 | 许可证       | 备注                 |
+| ------------------- | ----------------- | -------------------------------------------------------- | ------------ | -------------------- |
+| **BraTS**     | 脑肿瘤 MRI 多序列增强 | https://www.med.upenn.edu/cbica/brats/                   | 学术用途免费 | 最权威的脑肿瘤数据集 |
+| **LUNA16**    | 肺结节检测 CT 增强验证 | https://luna16.grand-challenge.org/                      | 公开         | 肺结节标准数据集     |
+| **FastMRI**   | MRI快速重建数据集 | https://fastmri.med.nyu.edu/                             | Apache 2.0   | 加速MRI重建基准数据集 |
+| **Medical Segmentation Decathlon** | 多模态医学图像增强 | https://medicaldecathlon.com/                           | CC BY-SA 4.0 | 10个器官的CT/MRI数据集 |
+| **IXI**       | 脑部MRI多中心数据 | https://brain-development.org/ixi-dataset/                | CC BY-SA 3.0 | 600个多中心脑部MRI数据 |
+| **OpenNeuro** | 开放神经影像数据 | https://openneuro.org/                                   | CC0         | 包含fMRI、DTI等多种神经影像数据 |
+| **TCIA**      | 癌症影像存档 | https://www.cancerimagingarchive.net/                    | 公开         | 包含多种癌症类型的影像数据 |
+| **QIN**       | 质量保证网络数据 | https://imagingcommons.cancer.gov/qin/                    | 公开         | 包含多种癌症影像和表型数据 |
+| **MIDRC**     | COVID-19影像数据 | https://midrc.org/                                        | 公开         | COVID-19胸部X光和CT数据集 |
+
+### 论文
+
+| **论文标题** | **关键字段** | **来源** | **备注** |
+| --- | --- | --- | --- |
+| **Generative Adversarial Networks in Medical Image augmentation: A review** | 医学GAN增强综述 | [ScienceDirect Computers in Biology and Medicine](https://www.sciencedirect.com/science/article/pii/S0010482522001743) | 全面综述GAN在医学图像增强中的应用 |
+| **A Review of Deep Learning in Medical Imaging: Imaging Traits, Technology Trends, Case Studies With Progress Highlights, and Future Promises** | 深度学习医学增强综述 | [IEEE Explore](https://ieeexplore.ieee.org/document/9363915) | 深度学习在医学图像增强中的综述 |
+| **Application of Super-Resolution Convolutional Neural Network for Enhancing Image Resolution in Chest CT** | 超分辨率增强 | [Springer Journal of Digital Imaging](https://link.springer.com/article/10.1007/s10278-017-0033-z) | SRCNN在医学图像超分辨率中的应用 |
+| **Generative adversarial network in medical imaging: A review** | 医学GAN合成综述 | [Medical Image Analysis](https://www.sciencedirect.com/science/article/pii/S1361841518308430) | GAN在医学图像合成中的最新进展 |
+| **Learning deconvolutional deep neural network for high resolution medical image reconstruction** | 去卷积网络超分辨率 | [Information Sciences](https://www.sciencedirect.com/science/article/pii/S0020025518306273) | 去卷积网络在医学图像超分辨率中的应用 |
+
+### 开源库
+
+| 库名称 | 功能 | GitHub/官网 | 用途 |
+|--------|------|-------------|------|
+| **MONAI** | 医学影像深度学习框架 | https://monai.io/ | 专为医学影像设计的PyTorch库，包含增强、恢复工具 |
+| **TorchIO** | 医学图像增强库 | https://torchio.readthedocs.io/ | 支持多种医学图像格式和增强变换 |
+| **ANTs** | 高级神经影像工具 | https://stnava.github.io/ANTs/ | 跨平台医学图像分析工具，包含高级增强功能 |
+| **MEDimage** | 医学图像分析 | https://github.com/frankdeno/MEDimage | 医学图像特征提取和增强工具 |
+| **medpy** | 医学图像处理 | https://github.com/loli/medpy/ | Python医学图像处理库，包含多种增强算法 |
+| **deepbrain** | 3D医学图像处理 | https://github.com/deepbrain-sea/deepbrain | 3D医学图像重建和增强工具 |
+| **niBabel** | 神经影像I/O | https://nipy.org/nibabel/ | 读取和写入神经影像格式的库 |
+| **pymic** | 医学影像计算 | https://github.com/WenXu101/pymic | 医学影像计算工具包，包含增强、分割、分类功能 |
+| **GM-Dropout** | 高斯dropout增强 | https://github.com/Borda/gm-dropout | 医学图像增强的高斯dropout实现 |
+| **Augmenters** | 图像增强库 | https://github.com/mdbloice/Augmenters | 医学图像增强的Python库 |
+| **Denoising-Diffusion-Model-Pytorch** | 扩散模型去噪 | https://github.com/lucidrains/denoising-diffusion-model-pytorch | 基于扩散模型的医学图像去噪 |
+| **SimpleITK** | 医学图像处理 | https://simpleitk.org/ | 跨平台的医学图像处理库 |
+
+---
+
 ::: info 🎯 章节完成
 通过本章的学习，你已经掌握了医学图像增强与恢复的核心技术。从传统的几何变换到先进的生成对抗网络，从简单的滤波去噪到复杂的深度学习超分辨率，这些技术将帮助你解决医学影像数据稀缺和质量问题，为后续的深度学习模型提供更好的数据基础。
 :::

@@ -1001,6 +1001,45 @@ class LungNoduleSegmentationNet(nn.Module):
 
 ---
 
-::: info =� Next Steps
+## 🔗 Typical Medical Datasets and Paper URLs Related to This Chapter
+
+### Datasets
+
+| Dataset | Purpose | Official URL | License | Notes |
+| --- | --- | --- | --- | --- |
+| **BraTS** | Brain Tumor Multi-sequence MRI Segmentation | https://www.med.upenn.edu/cbica/brats/ | Academic use free | Most authoritative brain tumor dataset |
+| **LUNA16** | Lung Nodule Detection and Segmentation | https://luna16.grand-challenge.org/ | Public | Standard lung nodule dataset |
+| **MSD** | Multi-organ Segmentation | https://medicaldecathlon.grand-challenge.org/ | Public | Multi-organ segmentation challenge |
+| **ATLAS** | Cardiac CT/MRI Segmentation | http://medicaldecathlon.grand-challenge.org/ | Academic use free | Cardiac segmentation dataset |
+| **KiTS21** | Kidney Tumor Segmentation | https://kits21.kits-challenge.org/ | Public | Kidney tumor segmentation |
+| **ISBI** | Cell Segmentation | http://brainiac2.mit.edu/isbi/ | Public | Electron microscope cell segmentation |
+
+### Papers
+
+| Paper Title | Keywords | Source | Notes |
+| --- | --- | --- | --- |
+| **U-Net: Convolutional Networks for Biomedical Image Segmentation** | U-Net segmentation network | [arXiv:1505.04597](https://arxiv.org/abs/1505.04597) | Original U-Net paper, pioneering encoder-decoder architecture for medical image segmentation |
+| **U-Net++: A Nested U-Net Architecture for Medical Image Segmentation** | Deep supervision segmentation | [arXiv:1807.10165](https://arxiv.org/abs/1807.10165) | U-Net++ improvement, enhancing segmentation accuracy through deep supervision and dense connections |
+| **nnU-Net: A Framework for Automatic, Deep Learning-Based Biomedical Image Segmentation** | Automatic segmentation framework | [Nat Methods 18, 203–211 (2021)](https://www.nature.com/articles/s41592-020-01008-z) | nnU-Net automation framework, achieving SOTA performance in multiple medical segmentation tasks |
+| **V-Net: Fully Convolutional Neural Networks for Volumetric Medical Image Segmentation** | 3D medical segmentation | [2016 Fourth International Conference on 3D Vision](https://arxiv.org/pdf/1606.04797) | V-Net, fully convolutional network designed specifically for 3D medical image segmentation |
+| **Attention U-Net: Learning Where to Look for a Pancreas** | Attention mechanism segmentation | [arXiv](https://arxiv.org/pdf/1804.03999) | Introducing attention mechanism in medical segmentation to improve target region recognition |
+| **Deep Learning for Brain Tumor Segmentation: A Survey** | Brain tumor segmentation review | [Springer Journal: Complex & Intelligent Systems](https://link.springer.com/article/10.1007/s40747-022-00815-5) | Comprehensive review of deep learning methods and comparisons for brain tumor segmentation |
+| **3D U-Net: Learning Dense Volumetric Segmentation from Sparse Annotation** | 3D sparse segmentation | [arXiv:1606.06650](https://arxiv.org/abs/1606.06650) | 3D U-Net extension, suitable for sparsely annotated 3D medical image segmentation |
+
+### Open Source Libraries
+
+| Library | Function | GitHub/Website | Purpose |
+| --- | --- | --- | --- |
+| **TorchIO** | Medical Image Transformation Library | https://torchio.readthedocs.io/ | Medical image data augmentation |
+| **nnU-Net** | Automatic Segmentation Framework | https://github.com/MIC-DKFZ/nnunet | Medical image segmentation framework |
+| **MONAI** | Deep Learning Medical AI | https://monai.io/ | Medical imaging deep learning |
+| **SimpleITK** | Medical Image Processing | https://www.simpleitk.org/ | Image processing toolkit |
+| **ANTsPy** | Image Registration and Analysis | https://github.com/ANTsX/ANTsPy | Advanced image analysis |
+| **medpy** | Medical Image Processing | https://github.com/loli/medpy | Medical imaging algorithm library |
+| **DeepLabv3+** | Semantic Segmentation | https://github.com/tensorflow/models | DeepLabv3+ implementation |
+
+---
+
+::: info 🚀 Next Steps
 Now you have mastered the core principles and application techniques of U-Net and its variants. In the next section (5.3 Classification and Detection), we will learn about classification and detection tasks in medical images, understanding how to further diagnose diseases and locate lesions from segmentation results.
 :::

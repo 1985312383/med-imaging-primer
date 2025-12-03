@@ -1497,6 +1497,41 @@ flowchart TD
 
 ---
 
+---
+
+## 🔗 Typical Medical Datasets and Paper URLs Related to This Chapter
+
+### Datasets
+
+| Dataset | Purpose | Official URL | License | Notes |
+| --- | --- | --- | --- | --- |
+| **NIH ChestX-ray14** | Chest X-ray Classification Detection | https://nihcc.app.box.com/v/ChestX-ray14 | Public | Contains 14 types of chest disease labels |
+| **CheXpert** | Chest X-ray Classification | https://stanfordmlgroup.github.io/competitions/chexpert/ | CC-BY 4.0 | Stanford standard dataset, with 5 abnormality labels |
+| **MIMIC-CXR** | Chest X-ray Multi-label Classification | https://physionet.org/content/mimic-cxr-jpg/2.0.0/ | MIT License | Real clinical data from Boston Children's Hospital |
+| **PadChest** | Chest X-ray + Clinical Data | https://bimcv.cipf.es/bimcv-projects/padchest/ | CC BY 4.0 | Contains 100,000 X-ray images with clinical reports |
+| **DeepLesion** | Lesion Detection Dataset | https://wiki.cancerimagingarchive.net/pages/viewpage.action?pageId=53683303 | Public | Contains annotated data for various body lesions |
+| **MedicalDecathlon** | Multi-organ Classification Segmentation | https://medicaldecathlon.com/ | CC BY-SA 4.0 | 10 organs' CT/MRI dataset |
+| **ChestX-Ray8** | Chest Disease Classification | https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia | Public | Contains pneumonia, normal X-ray images |
+| **ISIC Archive** | Skin Lesion Classification | https://www.isic-archive.com/#!/topWithHeader/onlyHeaderTop/gallery | Public | Dermoscopy image classification benchmark |
+
+### Papers
+
+| Paper Title | Keywords | Source | Notes |
+| --- | --- | --- | --- |
+| **CheXNet: Radiologist-Level Pneumonia Detection on Chest X-Rays with Deep Learning** | Chest X-ray Pneumonia Detection | [arXiv:1711.05225](https://arxiv.org/abs/1711.05225) | Stanford University, using 121-layer DenseNet |
+| **Focal Loss for Dense Object Detection** | Focal Loss Loss Function | [arXiv:1708.02002](https://arxiv.org/abs/1708.02002) | Classic loss function paper addressing class imbalance |
+
+### Open Source Libraries
+
+| Library | Function | GitHub/Website | Purpose |
+| --- | --- | --- | --- |
+| **MONAI** | Medical Imaging Deep Learning Framework | https://monai.io/ | PyTorch library designed specifically for medical imaging, including classification, detection, and segmentation tools |
+| **TorchIO** | Medical Image Transformation Library | https://torchio.readthedocs.io/ | Supports multiple medical image formats and enhancement transformations |
+| **deepmedic** | 3D Medical Image Classification | https://github.com/DeepMedic/deepmedic | High-performance 3D medical image classification framework, especially suitable for brain images |
+| **Grad-CAM++** | Explainable Visualization | https://github.com/jacobgil/grad-cam-plus-plus | Attention visualization tool for medical image classification |
+
+---
+
 ::: info 🚀 Next Learning
 Now you have mastered the core technologies of medical image classification and detection. In the next section (5.4 Image Augmentation and Recovery), we will explore how to overcome data scarcity challenges through advanced data enhancement techniques and recover lost image information.
 :::

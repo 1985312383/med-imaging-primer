@@ -222,8 +222,9 @@ class MedicalClassificationModel(nn.Module):
 
 **🔍 分类任务的决策路径：**
 
-![胸部X线分类](https://www.researchgate.net/publication/341837493/figure/fig1/AS:894194425237504@1590191057416/Chest-X-ray-image-classification-using-deep-learning-The-model-learns-automatically-the.ppm)
+![Chest X-ray classification - 胸部X线分类](/images/ch05/CheXNet.png)
 *基于深度学习的胸部X线分类，模型自动学习疾病特征*
+*Source: [Diagnosis of corona diseases from associated genes and X-ray images using machine learning algorithms and deep CNN - 基于机器学习算法和深度CNN使用关联基因和X光图像诊断冠状病毒疾病](https://doi.org/10.1016/j.imu.2021.100621)*
 
 ### 经典2D CNN架构
 
@@ -1416,6 +1417,7 @@ flowchart TD
     L --> O[集成方法]
     L --> P[交叉验证]
 ```
+
 </details>
 
 #### 性能比较
@@ -1463,6 +1465,43 @@ flowchart TD
 - **弱监督学习**：减少标注需求
 - **联邦学习**：多中心合作、隐私保护
 
+---
+
+## 🔗 本章节相关的典型医学数据集和论文网址与开源库
+
+### 数据集
+
+| 数据集                     | 用途              | 官方网址                                                                    | 许可证       | 备注                              |
+| -------------------------- | ----------------- | --------------------------------------------------------------------------- | ------------ | --------------------------------- |
+| **NIH ChestX-ray14** | 胸部X光分类检测   | https://nihcc.app.box.com/v/ChestX-ray14                                    | 公开         | 包含14种胸部疾病标签              |
+| **CheXpert**         | 胸部X光分类       | https://stanfordmlgroup.github.io/competitions/chexpert/                    | CC-BY 4.0    | Stanford标准数据集，含5种异常标签 |
+| **MIMIC-CXR**        | 胸部X光多标签分类 | https://physionet.org/content/mimic-cxr-jpg/2.0.0/                          | MIT许可      | 波士顿儿童医院真实临床数据        |
+| **PadChest**         | 胸部X光+临床数据  | https://bimcv.cipf.es/bimcv-projects/padchest/                              | CC BY 4.0    | 包含10万张X光片，含临床报告       |
+| **DeepLesion**       | 病灶检测数据集    | https://wiki.cancerimagingarchive.net/pages/viewpage.action?pageId=53683303 | 公开         | 包含各种体部病灶的标注数据        |
+| **MedicalDecathlon** | 多器官分类分割    | https://medicaldecathlon.com/                                               | CC BY-SA 4.0 | 10个器官的CT/MRI数据集            |
+| **ChestX-Ray8**      | 胸部疾病分类      | https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia               | 公开         | 包含肺炎、正常X光片               |
+| **ISIC Archive**     | 皮肤病变分类      | https://www.isic-archive.com/#!/topWithHeader/onlyHeaderTop/gallery         | 公开         | 皮肤镜图像分类基准                |
+
+### 论文
+
+| **论文标题** | **关键字段** | **来源** | **备注** |
+| --- | --- | --- | --- |
+| **CheXNet: Radiologist-Level Pneumonia Detection on Chest X-Rays with Deep Learning**                | 胸部X光肺炎检测    | [arXiv:1711.05225](https://arxiv.org/abs/1711.05225)                                     | Stanford大学，使用121层DenseNet      |
+| **Focal Loss for Dense Object Detection**                                                            | Focal Loss损失函数 | [arXiv:1708.02002](https://arxiv.org/abs/1708.02002)                                     | 解决类别不平衡的经典损失函数论文     |
+
+### 开源库
+
+| 库名称                | 功能                 | GitHub/官网                                     | 用途                                                  |
+| --------------------- | -------------------- | ----------------------------------------------- | ----------------------------------------------------- |
+| **MONAI**       | 医学影像深度学习框架 | https://monai.io/                               | 专为医学影像设计的PyTorch库，包含分类、检测、分割工具 |
+| **TorchIO**     | 医学图像变换库       | https://torchio.readthedocs.io/                 | 支持多种医学图像格式和增强变换                        |
+| **deepmedic**   | 3D医学图像分类       | https://github.com/DeepMedic/deepmedic          | 高性能3D医学图像分类框架，特别适合脑部图像            |
+| **Grad-CAM++**  | 可解释性可视化       | https://github.com/jacobgil/grad-cam-plus-plus  | 医学图像分类的注意力可视化工具                        |
+| **medcam**      | 医学CAM实现          | https://github.com/rigetti/medcam               | 针对医学图像的可解释性CAM工具                         |
+| **clEsperanto** | GPU加速医学图像处理  | https://github.com/CI-BinaryDisease/clEsperanto | 基于GPU的医学图像处理和分类加速                       |
+| **pydicom**     | DICOM文件处理        | https://pydicom.github.io/pydicom-sphinx/       | 医学DICOM文件的读取和处理                             |
+| **SimpleITK**   | 医学图像处理         | https://simpleitk.org/                          | 跨平台的医学图像处理库，支持多种格式                  |
+| **OpenSlide**   | 全幻灯片图像处理     | https://openslide.org/                          | 用于处理全幻灯片图像的高性能库                        |
 ---
 
 ::: info 🚀 下一步学习
