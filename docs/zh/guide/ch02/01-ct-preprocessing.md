@@ -461,6 +461,12 @@ $$I_{\text{corrected}, i} = (I_{\text{measured}, i} - I_{\text{dark}, i}) \times
 3. **能谱改变**：透射X射线的平均能量增加，能谱变"硬"
 4. **衰减系数改变**：有效衰减系数 $\mu_{\text{eff}}$ 随着能谱改变而改变，不再是常数
 
+![](/images/ch02/beam_hardening.png)
+*蓝色能谱为入射X-射线束的能谱，红色能谱为在穿过厚度1厘米的铝块后的能谱*
+
+![](/images/ch02/projection_after_beam_hardening.png)
+*穿过不同厚度的任意物体，投影值与路径长度关系的示意图*
+
 **射束硬化的临床表现**：
 
 - **杯状伪影（Cupping artifact）**：均匀物体的中心CT值偏低，边缘偏高，形成"杯子"形状
@@ -518,6 +524,9 @@ $$I_{\text{corrected}, i} = (I_{\text{measured}, i} - I_{\text{dark}, i}) \times
 1. **建立两材料模型**：
    - 假设扫描对象由水和骨两种材料组成
    - 对水和骨进行分别扫描，建立各自的衰减曲线
+
+![](/images/ch02/bone_beam_hardening_correction.png)
+*骨硬化假设示意图*
 
 2. **材料分解**：
    对于混合材料，投影值为：
@@ -857,3 +866,4 @@ graph LR
 
 ---
 
+[1] BAUR M, UHLMANN N, PÖSCHEL T, et al., 2019. Correction of beam hardening in x-ray radiograms[J]. Review of Scientific Instruments, 90(2): 025108. DOI: 10.1063/1.5080540.
