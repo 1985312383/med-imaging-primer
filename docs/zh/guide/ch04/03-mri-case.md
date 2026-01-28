@@ -279,7 +279,7 @@ recon_enhanced = recon_denoised + 0.5 * unsharp_mask
 
 完整的MRI重建流程代码已整理为Jupyter Notebook：
 
-📓 [`mri_reconstruction_pipeline.ipynb`](../../../../src/ch04/mri_reconstruction_pipeline.ipynb)
+📓 [`mri_reconstruction_pipeline.ipynb`](https://github.com/1985312383/med-imaging-primer/tree/main/src/ch04/mri_reconstruction_pipeline.ipynb)
 
 包含：
 - 所有重建算法的完整实现
