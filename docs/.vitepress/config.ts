@@ -5,7 +5,9 @@ import { MermaidPlugin } from './theme/plugins/mermaid'
 export default defineConfig({
   title: '医学影像处理开源教程',
   description: '从物理成像原理到深度学习的系统性入门指南',
-
+  head: [
+    ['link', { rel: 'icon', href: `/med-imaging-primer/favicon.ico` }]
+  ],
   // GitHub Pages 部署路径（仓库名）
   base: '/med-imaging-primer/',
 
@@ -22,6 +24,7 @@ export default defineConfig({
       title: '医学影像处理开源教程',
       description: '从物理成像原理到深度学习的系统性入门指南',
       themeConfig: {
+        logo: '/favicon.ico',
         nav: [
           { text: '首页', link: '/' },
           { text: '教程', link: '/guide/' },
