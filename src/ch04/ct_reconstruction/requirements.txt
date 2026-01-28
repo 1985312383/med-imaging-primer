@@ -1,0 +1,18 @@
+# CT重建流程依赖项
+# 安装命令: pip install -r requirements.txt
+
+# 基础科学计算
+numpy>=1.20.0
+
+# 数据可视化
+matplotlib>=3.3.0
+
+# 图像处理
+scikit-image>=0.18.0
+
+# 科学计算库
+scipy>=1.6.0
+
+# Jupyter Notebook (可选，用于运行.ipynb文件)
+jupyter>=1.0.0
+ipython>=7.0.0
