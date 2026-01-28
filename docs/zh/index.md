@@ -9,6 +9,9 @@ hero:
   name: "医学影像处理开源教程"
   text: "一个开源的教程"
   tagline: 从物理成像、重建算法到深度学习后处理的系统性入门指南
+  image:
+    src: /images/logo.png
+    alt: 医学影像处理开源教程
   actions:
     - theme: brand
       text: 开始阅读
