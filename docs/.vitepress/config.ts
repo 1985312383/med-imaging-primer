@@ -66,7 +66,8 @@ export default defineConfig({
               items: [
                 { text: '2.1 CT/X-ray：正弦图与探测器校正', link: '/guide/ch02/01-ct-preprocessing' },
                 { text: '2.2 MRI：K空间去卷绕与填充', link: '/guide/ch02/02-mri-preprocessing' },
-                { text: '2.3 PET/US：衰减校正与降噪', link: '/guide/ch02/03-pet-us-preprocessing' }
+                { text: '2.3 PET/US：衰减校正与降噪', link: '/guide/ch02/03-pet-us-preprocessing' },
+                { text: '2.4 X射线：直接成像的校正', link: '/guide/ch02/04-xray-preprocessing' }
               ]
             },
             {
@@ -176,7 +177,8 @@ export default defineConfig({
               items: [
                 { text: '2.1 CT/X-ray: Sinogram & Detector Correction', link: '/en/guide/ch02/01-ct-preprocessing' },
                 { text: '2.2 MRI: k-Space Unwrapping & Padding', link: '/en/guide/ch02/02-mri-preprocessing' },
-                { text: '2.3 PET/US: Attenuation Correction & Denoising', link: '/en/guide/ch02/03-pet-us-preprocessing' }
+                { text: '2.3 PET/US: Attenuation Correction & Denoising', link: '/en/guide/ch02/03-pet-us-preprocessing' },
+                { text: '2.4 X-ray: Direct Imaging Correction', link: '/en/guide/ch02/04-xray-preprocessing' }
               ]
             },
             {

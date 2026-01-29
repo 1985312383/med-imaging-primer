@@ -63,8 +63,23 @@ This tutorial aims to help beginners systematically learn medical imaging proces
 - **1.4** Artifacts in Medical Imaging — Identifying and understanding imaging artifacts
 
 #### Chapter 2: Modality-Specific Preprocessing
-- **2.1** CT: From Detector Signal to Corrected Projection ✨ **NEW**
+- **2.1** CT: From Detector Signal to Corrected Projection
   - Complete workflow from photon acquisition to calibrated projection data
+- **2.2** MRI k-space Preprocessing ✨ **NEW**
+  - K-space data generation, undersampling strategies, and filtering techniques
+
+#### Chapter 3: Image Reconstruction Algorithms
+- **3.1** Analytic Reconstruction: Filtered Back Projection (FBP)
+  - Mathematical principles of CT reconstruction and filter selection
+- **3.2** Iterative Reconstruction: Algebraic and Compressed Sensing Methods ✨ **NEW**
+  - POCS, SART and other iterative algorithms: principles and implementation
+
+#### Chapter 4: Multi-Modality Reconstruction Practice
+- **4.1** Dataset Introduction and Experiment Preparation
+- **4.2** Case Study 1: Complete CT Reconstruction Workflow ✨ **NEW**
+  - Full pipeline from raw projection data to reconstructed images
+- **4.3** Case Study 2: MRI K-space Imaging and Reconstruction Experiments ✨ **NEW**
+  - Undersampling strategies, reconstruction algorithms, and quality assessment
 
 #### Chapter 5: Deep Learning Post-processing
 - **5.1** Preprocessing — Modality-specific data preparation for AI models
@@ -73,10 +88,9 @@ This tutorial aims to help beginners systematically learn medical imaging proces
 - **5.4** Image Enhancement and Recovery — Denoising and super-resolution techniques
 
 ### 🚀 Coming Soon
-- **2.2** MRI k-space Preprocessing
 - **2.3** X-ray Direct Imaging Correction
-- **Chapter 3** Image Reconstruction Algorithms by Modality
-- **Chapter 4** Multi-Modality Reconstruction Practice
+- **4.4** More Reconstruction Cases (PET, Ultrasound, etc.)
+- **Chapter 6** Advanced Topics and Cutting-Edge Techniques
 
 ## 🤝 Contributing
 

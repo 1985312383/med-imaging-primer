@@ -56,7 +56,7 @@ $$
 
 
 $$
-s(\mathbf{k}) = \iint I(x,y)e^{-i2\pi\(\vec{k}\cdot\vec{r})}d\mathbf{r}
+s(\mathbf{k}) = \iint I(x,y)e^{-i2\pi(\vec{k}\cdot\vec{r})}d\mathbf{r}
 $$
 
 其中 

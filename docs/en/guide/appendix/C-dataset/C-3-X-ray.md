@@ -1,7 +1,9 @@
-# C-3 X-ray Type Datasets
+---
+title: Appendix C-3 X-ray Type Datasets
+description: Introduces X-ray type datasets
+---
 
-> title: C-3 X-ray Type Datasets  
-> description: Introduces X-ray type datasets
+# Appendix C-3: X-ray Type Datasets
 
 # 3. CheXpert (Large-scale Chest X-ray Lesion Detection Dataset)
 

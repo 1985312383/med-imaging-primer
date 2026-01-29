@@ -1,7 +1,9 @@
-# D Glossary
+---
+title: Appendix D Glossary
+description: Introduces common terminology
+---
 
-> title: D Glossary  
-> description: Introduces common terminology
+# Appendix D: Glossary
 
 |English Term|Explanation|
 | --------------------------------| ----------------------------------------------------------------------|

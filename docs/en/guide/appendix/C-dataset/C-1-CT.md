@@ -1,7 +1,9 @@
-# C-1 CT Type Datasets
+---
+title: Appendix C-1 CT Type Datasets
+description: Introduces CT type datasets
+---
 
-> title: C-1 CT Type Datasets  
-> description: Introduces CT type datasets
+# Appendix C-1: CT Type Datasets
 
 # 1. LIDC-IDRI (Lung CT Nodule Database)
 

@@ -1,7 +1,9 @@
-# C-4 Multimodal Datasets
+---
+title: Appendix C-4 Multimodal Datasets
+description: Introduces multimodal datasets
+---
 
-> title: C-4 Multimodal Datasets  
-> description: Introduces multimodal datasets
+# Appendix C-4: Multimodal Datasets
 
 # 1. ADNI (Alzheimer's Disease Neuroimaging)
 
