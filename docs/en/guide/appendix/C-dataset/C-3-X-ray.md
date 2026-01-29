@@ -1,5 +1,5 @@
 ---
-title: Appendix C-3: X-ray Type Datasets
+title: Appendix C-3 X-ray Type Datasets
 description: Introduces X-ray type datasets
 ---
 

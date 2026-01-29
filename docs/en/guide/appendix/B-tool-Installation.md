@@ -1,5 +1,5 @@
 ---
-title: Appendix B: Tool Installation
+title: Appendix B Tool Installation
 description: Introduces installation methods for common tools.
 ---
 

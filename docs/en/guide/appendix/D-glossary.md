@@ -1,5 +1,5 @@
 ---
-title: Appendix D: Glossary
+title: Appendix D Glossary
 description: Introduces common terminology
 ---
 

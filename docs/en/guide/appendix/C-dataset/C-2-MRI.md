@@ -1,5 +1,5 @@
 ---
-title: Appendix C-2: MRI Type Datasets
+title: Appendix C-2 MRI Type Datasets
 description: Introduces MRI type datasets
 ---
 

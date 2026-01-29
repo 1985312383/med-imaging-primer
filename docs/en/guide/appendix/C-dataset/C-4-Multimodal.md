@@ -1,5 +1,5 @@
 ---
-title: Appendix C-4: Multimodal Datasets
+title: Appendix C-4 Multimodal Datasets
 description: Introduces multimodal datasets
 ---
 

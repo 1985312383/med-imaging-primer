@@ -1,5 +1,5 @@
 ---
-title: A Key Formulas
+title: Appendix A Key Formulas
 description: Summarizes the most common, important, and cross-modality universal formulas in medical imaging. Enables readers to quickly consult and understand mathematical derivations when reading the main tutorial. Suitable for beginners to quickly establish a formula framework.
 ---
 

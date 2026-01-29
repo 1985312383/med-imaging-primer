@@ -1,5 +1,5 @@
 ---
-title: Appendix C-1: CT Type Datasets
+title: Appendix C-1 CT Type Datasets
 description: Introduces CT type datasets
 ---
 
