@@ -1,7 +1,9 @@
-# C-2 MRI Type Datasets
+---
+title: Appendix C-2: MRI Type Datasets
+description: Introduces MRI type datasets
+---
 
-> title: C-2 MRI Type Datasets  
-> description: Introduces MRI type datasets
+# Appendix C-2: MRI Type Datasets
 
 # 1. BraTS (Brain Tumor MRI Segmentation Dataset)
 

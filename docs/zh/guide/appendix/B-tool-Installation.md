@@ -1,20 +1,19 @@
-# B 工具安装
+---
+title: 附录B：工具安装
+description: 介绍常见工具的安装方法。
+---
 
-> title: A  工具安装
->
-> description: 介绍常见工具的安装方法。
+# 附录B：工具安装
 
-# B 工具安装
-
-# 1.引言
+## 1.引言
 
 医学影像的算法开发通常依赖多种工具链的协作，本章将介绍本教程所需的核心环境，包括 **Python、ASTRA、BART、MONAI、NiBabel** 等基础组件。我们将从基础 Python 环境配置开始，逐步说明如何安装 CT 重建库（ASTRA）、MRI 重建工具箱（BART）、深度学习框架（MONAI）与医学影像文件读写工具（NiBabel）。通过本节内容，读者可以快速搭建一个完整、可复现的医学影像开发与重建实验环境。
 
-# 2.直接安装 python
+## 2.直接安装 python
 
-## 2.1.window 系统
+### 2.1.window 系统
 
-### 2.1.1.下载 Python 安装程序
+#### 2.1.1.下载 Python 安装程序
 
 **推荐方式：从 Python 官网下载安装包**
 
@@ -24,7 +23,7 @@
 4. 点击这个按钮，下载一个 `.exe`​ 安装程序（例如：`python-3.12.3-amd64.exe`）
 
 
-### 2.1.2. 运行安装程序（最关键的一步）
+#### 2.1.2. 运行安装程序（最关键的一步）
 
 双击下载好的 `python-3.xx-amd64.exe`，按下面步骤设置：
 
@@ -51,7 +50,7 @@
         - ✅ `Precompile standard library`（加快首次运行速度）
 
 
-### 2.1.3. 验证 Python 是否安装成功
+#### 2.1.3. 验证 Python 是否安装成功
 
 安装完成后，按下面步骤检查：
 
@@ -77,7 +76,7 @@
 
 ---
 
-### 2.1.4. 验证 pip 是否可用
+#### 2.1.4. 验证 pip 是否可用
 
 在同一个命令行里输入：
 
@@ -93,9 +92,9 @@ pip 24.x from C:\Python\Python312\Lib\site-packages\pip (python 3.12)
 
 说明 `pip`​ 已安装成功，可以用来安装后续的 `monai`​、`nibabel` 等包。
 
-## 2.2.Linux 系统
+### 2.2.Linux 系统
 
-### 2.2.1. 检查系统是否已安装 Python
+#### 2.2.1. 检查系统是否已安装 Python
 
 打开终端（Terminal），输入：
 
@@ -119,7 +118,7 @@ pip3 --version
 
 如果提示 “command not found”，说明还没安装 pip，后面会安装。
 
-### 2.2.2. 使用包管理器安装 Python（Ubuntu / Debian）
+#### 2.2.2. 使用包管理器安装 Python（Ubuntu / Debian）
 
 2.1 更新软件源
 
@@ -150,12 +149,12 @@ python3 --version
 pip3 --version
 ```
 
-# 3.使用 conda 安装 python（推荐）
+## 3.使用 conda 安装 python（推荐）
 
 Conda 是数据科学与医学影像领域最常用的环境管理工具，能够为不同项目创建彼此独立的 Python 环境，避免包冲突。  
 本节将介绍如何在 **Windows / Linux** 上安装 Conda（Miniconda）并创建干净可控的 Python 环境。
 
-## 3.1. 下载并安装 Miniconda（推荐）
+### 3.1. 下载并安装 Miniconda（推荐）
 
 **为什么用 Miniconda 而不是 Anaconda？**
 
@@ -163,9 +162,9 @@ Conda 是数据科学与医学影像领域最常用的环境管理工具，能�
 - 更适合科研项目与医学影像工程
 - 完全兼容 Anaconda 的功能
 
-## 3.2. Windows 安装 Miniconda
+### 3.2. Windows 安装 Miniconda
 
-### **步骤 1：下载安装包**
+#### **步骤 1：下载安装包**
 
 访问官网：
 
@@ -176,7 +175,7 @@ Conda 是数据科学与医学影像领域最常用的环境管理工具，能�
 
 - **Miniconda3 Windows 64-bit Installer (.exe)**
 
-### **步骤 2：运行安装程序**
+#### **步骤 2：运行安装程序**
 
 双击安装包：
 
@@ -187,7 +186,7 @@ Conda 是数据科学与医学影像领域最常用的环境管理工具，能�
 3. 点击 Install
 
 
-### **步骤 3：验证安装**
+##### **步骤 3：验证安装**
 
 打开 *Anaconda Prompt* 或 CMD：
 
@@ -203,7 +202,7 @@ conda 24.x.x
 
 则安装成功。
 
-## 3. Linux 安装 Miniconda
+### 3.3 Linux 安装 Miniconda
 
 ### **步骤 1：下载安装脚本**
 
@@ -244,7 +243,7 @@ source ~/miniconda3/bin/activate
 conda --version
 ```
 
-### 步骤4：创建一个新的 Python 环境（最关键）
+#### 步骤4：创建一个新的 Python 环境（最关键）
 
 无论 Windows / Linux，下面步骤完全一致。
 
@@ -277,9 +276,9 @@ python --version
 Python 3.10.x
 ```
 
-# 4.安装 ASTRA
+## 4.安装 ASTRA
 
-## 4.1.ASTRA Toolbox 简介
+### 4.1.ASTRA Toolbox 简介
 
 > **ASTRA Toolbox 官方链接：**
 >
@@ -296,13 +295,13 @@ Python 3.10.x
 
 的首选工具之一。
 
-## 4.2.Windows 系统安装 ASTRA Toolbox
+### 4.2.Windows 系统安装 ASTRA Toolbox
 
-### 通过 Conda 安装（最推荐）
+#### 通过 Conda 安装（最推荐）
 
 这是针对 Windows 的​**首选方式**：简单、稳定、无须编译。
 
-### **步骤 1：创建 Python 环境**
+#### **步骤 1：创建 Python 环境**
 
 建议先创建一个干净的 Conda 环境（避免污染系统 Python）：
 
@@ -313,7 +312,7 @@ conda activate medimg
 
 > 推荐 Python 3.9–3.11（ASTRA 官方支持范围）。
 
-### **步骤 2：安装 ASTRA（CPU 版本）**
+#### **步骤 2：安装 ASTRA（CPU 版本）**
 
 Windows 不支持 GPU 版本，因此直接用：
 
@@ -344,16 +343,16 @@ print(astra.__version__)
 
 正常输出版本号（如 `1.10.0`）即安装成功。
 
-## 4.2.Linux 系统安装 ASTRA Toolbox
+### 4.3.Linux 系统安装 ASTRA Toolbox
 
-### **步骤 1：创建环境（强烈推荐独立环境）**
+#### **步骤 1：创建环境（强烈推荐独立环境）**
 
 ```bash
 conda create -n medimg python=3.10
 conda activate medimg
 ```
 
-### **步骤 2：安装 ASTRA（自动选择 CPU/GPU）**
+#### **步骤 2：安装 ASTRA（自动选择 CPU/GPU）**
 
 执行官方推荐命令：
 
@@ -370,7 +369,7 @@ conda install -c astra-toolbox -c nvidia astra-toolbox
 
 **不需要手动安装 CUDA toolkit！**
 
-### **步骤 3：测试安装**
+#### **步骤 3：测试安装**
 
 ```bash
 python - << 'EOF'
@@ -381,7 +380,7 @@ EOF
 
 输出版本号即成功。
 
-## 4.3.测试安装结果
+### 4.4.测试安装结果
 
 可以用此代码验证 ASTRA 是否能正常工作：
 
@@ -407,9 +406,9 @@ print("sino shape:", sino.shape)
 sino shape: (180, 64)
 ```
 
-# 5.安装 BART
+## 5.安装 BART
 
-## 5.1.BART 简介
+### 5.1.BART 简介
 
 > 官方网站：https://mrirecon.github.io/bart/  
 > GitHub 仓库：https://github.com/mrirecon/bart  
@@ -438,9 +437,9 @@ BART 是一个 ​**高性能 MRI 重建与信号处理工具包**，特点是�
   - k-space 非均匀采样
   - 多维数据 (2D/3D/dynamic MRI)
 
-## 5.2.Windows 系统下安装 BART
+### 5.2.Windows 系统下安装 BART
 
-### 步骤1：环境准备
+#### 步骤1：环境准备
 
 - Windows 系统。
 - 安装一个兼容的 *GLC 编译器环境*（BART 在 Windows 上官方支持有限）。官方给出两种路径：使用 Cygwin 或者用虚拟机运行 Linux。
@@ -451,14 +450,14 @@ BART 是一个 ​**高性能 MRI 重建与信号处理工具包**，特点是�
   - Math: liblapack-devel, liblapack-doc, liblapack0
 - 若希望 GPU 加速（Windows 本身支持较弱）—通常建议在 Linux 下做。文档中指出 “Running BART on Windows is *not supported*” 但有用户通过 Cygwin/WSL 运行。
 
-### 步骤2：下载 BART 源码或发行包
+#### 步骤2：下载 BART 源码或发行包
 
 - 打开仓库： https://github.com/mrirecon/bart
 - 或官方网页： https://mrirecon.github.io/bart/installation.html → 下载最新版 zip/tar 包。
 - 下载最新 Release（如 version 0.9.00）中的 Windows 支持说明。
 - 解压压缩文件到某个目录，例如 C:\\tools\\bart-0.9.00\\
 
-### 步骤3：使用 Cygwin 编译安装
+#### 步骤3：使用 Cygwin 编译安装
 
 - 安装 Cygwin：访问 https://www.cygwin.com/，下载安装程序。
 - 在安装 Cygwin 时，在安装界面选择对应包（见 “环境准备”）。
@@ -472,7 +471,7 @@ BART 是一个 ​**高性能 MRI 重建与信号处理工具包**，特点是�
   这样会编译 BART 的命令行工具与库。
 - 如果希望支持 GPU（视 Windows 下是否有适配、可能失败）可尝试在 Makefile 中添加 `CUDA=1`，但官方警告 Windows 支持有限。
 
-### 步骤4：在 Windows（Cygwin）中验证安装
+#### 步骤4：在 Windows（Cygwin）中验证安装
 
 1. 在 Cygwin shell 中，尝试运行某个 BART 工具命令：
 
@@ -482,14 +481,14 @@ BART 是一个 ​**高性能 MRI 重建与信号处理工具包**，特点是�
 2. 在 Python / MATLAB 中调用（如果你编译了 Python 接口）时，确保库路径已在环境变量中。
 3. 若遇 “command not found” 或库加载失败，可检查环境变量 `PATH` 是否包含 BART 的 bin 目录，或者 Cygwin 的 usr/bin 是否已链接。
 
-### 提示与常见问题
+#### 提示与常见问题
 
 - Windows 环境下 BART 支持程度低，**强烈推荐**使用 WSL2 或 Linux 虚拟机来运行更稳定。文档明确指出 “Windows support by MSYS2; generic” 或 “Use Cygwin” 等语句。
 - 若只是为了算法复现实验，也可以在 Windows 上启用 WSL2 安装 Ubuntu，然后在 WSL2 内按照 Linux 安装流程运行。
 - 编译过程中常见错误：缺少 `fftw3`​、`lapack`​、`blas` 库，确保在 Cygwin 安装时选择对应 dev 包。
 - GPU 支持在 Windows 极为不稳定，不推荐用于研究初期。
 
-## 5.3.Linux 系统下安装 BART
+### 5.3.Linux 系统下安装 BART
 
 ### 步骤1：环境准备
 
@@ -512,7 +511,7 @@ sudo apt-get install -y \
 - ​`libpng-dev`：若需要图像读取/写出支持。
 - ​`libopenblas-dev`：推荐加速 BLAS 运算。
 
-### 步骤2：下载 BART 源码或 Release 包
+#### 步骤2：下载 BART 源码或 Release 包
 
 往官方页面或 GitHub 仓库下载最新版本：
 
@@ -570,7 +569,7 @@ import bart
 bart.print_settings()
 ```
 
-### 步骤5：验证安装是否成功
+#### 步骤5：验证安装是否成功
 
 在终端执行：
 
@@ -580,9 +579,9 @@ bart fft   # 显示帮助说明
 
 也可以运行一个简单命令行重建工具测试。若能输出版本号、帮助信息或不报错，即表示安装成功。
 
-# 6.安装 MONAI
+## 6.安装 MONAI
 
-## 6.1.MONAI 简介
+### 6.1.MONAI 简介
 
 > - 官方网站：https://monai.dev/
 > - GitHub 仓库：https://github.com/Project-MONAI/MONAI
@@ -593,7 +592,7 @@ bart fft   # 显示帮助说明
 
 MONAI 已成为医学影像 AI 研究中最主流的开源框架之一。
 
-## 6.2.安装前准备
+### 6.2.安装前准备
 
 在安装 MONAI 之前，需要：
 
@@ -602,7 +601,7 @@ MONAI 已成为医学影像 AI 研究中最主流的开源框架之一。
 - 可选：安装 NVIDIA 驱动（如需 GPU）
 - 推荐使用 **独立 conda 环境**
 
-## 6.3.安装 PyTorch
+### 6.3.安装 PyTorch
 
 MONAI 依赖 PyTorch，因此必须先安装 PyTorch。
 
@@ -626,7 +625,7 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 
 > 如果你不知道 CUDA 版本，运行 `nvidia-smi`（Linux）或查看 NVIDIA 控制面板（Windows）。
 
-## 6.4.安装 MONAI
+### 6.4.安装 MONAI
 
 ```bash
 pip install monai
@@ -648,7 +647,7 @@ pip install "monai[all]"
 
 适用于科研任务（如 segmentation / registration）。
 
-## 6.5.安装验证
+### 6.5.安装验证
 
 运行以下 Python 脚本：
 
@@ -663,9 +662,9 @@ print("CUDA available:", torch.cuda.is_available())
 
 若无报错，且输出现有版本，则说明安装成功。
 
-# 7.安装 NiBabel
+## 7.安装 NiBabel
 
-## 7.1.NiBabel 简介
+### 7.1.NiBabel 简介
 
 > - GitHub 仓库（源代码 + issues +开发者） : https://github.com/nipy/nibabel
 > - 官方文档 : https://nipy.org/nibabel/
@@ -673,7 +672,7 @@ print("CUDA available:", torch.cuda.is_available())
 
 NiBabel 是一个专门用于读取、处理和保存医学影像文件的 Python 工具包，支持 NIfTI（.nii/.nii.gz）、Analyze、MINC、MGH/MGZ 等主流格式，并能将医学影像数据加载为 NumPy 数组，同时提供 affine 矩阵、空间方向、头信息等完整元数据管理。它是医学影像 AI、神经影像（fMRI/dMRI）、深度学习预处理与科研分析中最常用的文件 I/O 库，也是 MONAI、PyTorch 及各种医学影像工具链的底层基础组件之一。
 
-## 7.2 **.安装当前稳定版（推荐）**
+### 7.2.安装当前稳定版（推荐）
 
 使用 pip 安装 NiBabel 的最新发布版本：
 
@@ -681,7 +680,7 @@ NiBabel 是一个专门用于读取、处理和保存医学影像文件的 Pytho
 pip install nibabel
 ```
 
-## 7.3 **. 安装最新开发版**
+### 7.3 安装最新开发版
 
 如果希望使用 GitHub 上的最新开发进度（未发布版本），可运行：
 
@@ -689,7 +688,7 @@ pip install nibabel
 pip install git+https://github.com/nipy/nibabel
 ```
 
-## 7.4 **. 以“可编辑模式”安装（开发 NiBabel 源码时使用）**
+### 7.4 以"可编辑模式"安装（开发 NiBabel 源码时使用）
 
 当你需要修改 NiBabel 源码、参与开发或调试时，可以以可编辑模式安装：
 
@@ -700,9 +699,9 @@ pip install -e ./nibabel
 
 这种方式会让 Python 直接引用本地源码目录，修改后无需重新安装。
 
-## 7.5.测试 NiBabel
+### 7.5.测试 NiBabel
 
-### **1. 在开发过程中运行完整测试（推荐开发者使用 tox）**
+#### **1. 在开发过程中运行完整测试（推荐开发者使用 tox）**
 
 ```bash
 git clone https://github.com/nipy/nibabel.git
@@ -712,7 +711,7 @@ tox
 
 ​`tox` 会自动创建虚拟环境并在多个 Python 版本下测试 NiBabel，适合参与开发的用户。
 
-### **2. 测试已安装的 NiBabel**
+#### **2. 测试已安装的 NiBabel**
 
 如果你只想测试当前系统中安装的 NiBabel，可安装测试依赖并运行 pytest：
 
