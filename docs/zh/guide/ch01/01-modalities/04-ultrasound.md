@@ -58,7 +58,7 @@ description: 了解超声的发明历史、成像原理和技术演进
 
 超声探头（transducer）的核心是**压电晶体**（如锆钛酸铅，PZT）：
 
-![压电效应原理](/images/ch01/piezoelectric-effect.svg)
+![压电效应原理](/images/ch01/piezoelectric-effect.png)
 *压电效应原理示意图：施加压力使晶体正负电荷中心偏移，产生电压信号*
 
 - **正压电效应**：施加电压→晶体振动→产生超声波
